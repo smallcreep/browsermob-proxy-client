@@ -32,3 +32,4 @@ build/
 .gradle/
 .idea/
 gradle/
+*.log

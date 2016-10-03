@@ -16,6 +16,8 @@ repositories {
 
 dependencies {
     testCompile 'junit:junit:4.11'
+    testCompile 'net.lightbody.bmp:browsermob-rest:2.1.2'
     compile 'net.lightbody.bmp:browsermob-core:2.1.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 }
