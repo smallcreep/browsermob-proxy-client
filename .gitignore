@@ -28,8 +28,6 @@ crashlytics-build.properties
 fabric.properties
 .gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
-.gradle/
 .idea/
-gradle/
+!gradle/wrapper/gradle-wrapper.jar
 *.log
