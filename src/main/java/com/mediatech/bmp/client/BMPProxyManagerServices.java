@@ -35,4 +35,8 @@ public interface BMPProxyManagerServices {
     @FormUrlEncoded
     @POST("/proxy")
     Call<BMPLittleProxy> proxyStart(@Field("port") int port, @Field("bindAddress") String bindAddress);
+
+    @FormUrlEncoded
+    @POST("/proxy")
+    Call<BMPLittleProxy> proxyStart(@Field("bindAddress") String bindAddress);
 }

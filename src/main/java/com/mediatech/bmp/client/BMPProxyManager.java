@@ -90,5 +90,7 @@ public abstract class BMPProxyManager {
 
     public abstract BMPLittleProxy start(BMPProxyParameters bmpProxyParameters) throws IOException;
 
+    public abstract BMPLittleProxy startWithProxyManager() throws IOException;
+
     public abstract BMPLittleProxy startWithProxyManager(int port) throws IOException;
 }

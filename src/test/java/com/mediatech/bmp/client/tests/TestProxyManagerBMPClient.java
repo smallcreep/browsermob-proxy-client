@@ -71,7 +71,7 @@ public class TestProxyManagerBMPClient extends ProxyManagerTest {
     }
 
     @Test
-    public void testGetProxiesWithPortAndBindAdress() throws Throwable {
+    public void testGetProxiesWithPortAndBindAddress() throws Throwable {
         ProxyListDescriptor proxyListDescriptorExpected = new ProxyListDescriptor();
         int port = PORT + 10;
         BMPProxyParameters bmpProxyParameters = new BMPProxyParameters(port, ADDRESS);
@@ -84,7 +84,33 @@ public class TestProxyManagerBMPClient extends ProxyManagerTest {
     }
 
     @Test
-    public void testGetProxiesWithPortAndAddressProxyManager() throws Throwable {
+    public void testGetProxiesWithBindAddress() throws Throwable {
+        ProxyListDescriptor proxyListDescriptorExpected = new ProxyListDescriptor();
+        int port = PORT + 1;
+        BMPProxyParameters bmpProxyParameters = new BMPProxyParameters();
+        bmpProxyParameters.setBindAddress(ADDRESS);
+        BMPLittleProxy bmpLittleProxyActual = bmpProxyManager.start(bmpProxyParameters);
+        BMPLittleProxy bmpLittleProxyExpected = new BMPLittleProxy(port, ADDRESS);
+        assertEquals(bmpLittleProxyExpected, bmpLittleProxyActual);
+        proxyListDescriptorExpected.getProxyList().add(new ProxyDescriptor(port));
+        ProxyListDescriptor proxyListDescriptorActual = bmpProxyManager.getProxies();
+        assertEquals(proxyListDescriptorExpected, proxyListDescriptorActual);
+    }
+
+    @Test
+    public void testGetProxiesWithAddressProxyManager() throws Throwable {
+        ProxyListDescriptor proxyListDescriptorExpected = new ProxyListDescriptor();
+        int port = PORT + 1;
+        BMPLittleProxy bmpLittleProxyActual = bmpProxyManager.startWithProxyManager();
+        BMPLittleProxy bmpLittleProxyExpected = new BMPLittleProxy(port, ADDRESS);
+        assertEquals(bmpLittleProxyExpected, bmpLittleProxyActual);
+        proxyListDescriptorExpected.getProxyList().add(new ProxyDescriptor(port));
+        ProxyListDescriptor proxyListDescriptorActual = bmpProxyManager.getProxies();
+        assertEquals(proxyListDescriptorExpected, proxyListDescriptorActual);
+    }
+
+    @Test
+    public void testGetProxiesWithAddressProxyManagerAndPort() throws Throwable {
         ProxyListDescriptor proxyListDescriptorExpected = new ProxyListDescriptor();
         int port = PORT + 10;
         BMPLittleProxy bmpLittleProxyActual = bmpProxyManager.startWithProxyManager(port);
@@ -94,5 +120,4 @@ public class TestProxyManagerBMPClient extends ProxyManagerTest {
         ProxyListDescriptor proxyListDescriptorActual = bmpProxyManager.getProxies();
         assertEquals(proxyListDescriptorExpected, proxyListDescriptorActual);
     }
-
 }
