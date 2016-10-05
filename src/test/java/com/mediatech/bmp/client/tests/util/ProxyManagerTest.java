@@ -51,17 +51,13 @@ public abstract class ProxyManagerTest {
             url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy.bat");
             startJavaPIDs = getJavaPids();
         } else {
-            System.out.println("BMP CLIENT DEBUG: " + "CHANGE LINUX");
             url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy");
             String commandLine = getComandLineChmod(url);
-            System.out.println("BMP CLIENT DEBUG: " + "ADD PERMISSIONS TO START PROXY '" + commandLine + "'");
             proc = Runtime.getRuntime().exec(commandLine);
         }
         String commandLine = getComandLineString(url);
-        System.out.println("BMP CLIENT DEBUG: " + "START PROXY WITH COMMAND LINE '" + commandLine + "'");
         proc = Runtime.getRuntime().exec(commandLine);
         Thread.sleep(2000);
-        System.out.println("BMP CLIENT DEBUG: " + "THREAD SLEEP");
         bmpProxyManager = new BMPLittleProxyManager(PORT, ADDRESS);
     }
 
