@@ -21,8 +21,8 @@ package com.mediatech.bmp.client.parameters;
  */
 public class BMPProxyParameters {
 
-    public int port = -1;
-    public String bindAddress = null;
+    private int port = -1;
+    private String bindAddress = null;
 
     public BMPProxyParameters() {
     }

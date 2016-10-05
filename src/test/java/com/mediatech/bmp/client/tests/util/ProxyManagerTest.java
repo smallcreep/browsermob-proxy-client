@@ -39,12 +39,11 @@ import java.util.regex.Pattern;
 public abstract class ProxyManagerTest {
 
     private Process proc = null;
-    public static int PORT = 8080;
-    public static String ADDRESS = "127.0.0.1";
-    String commandLine;
+    private static int PORT = 8080;
+    private static String ADDRESS = "127.0.0.1";
+    private String commandLine;
     private List<Integer> startJavaPIDs;
-    public BMPLittleProxyManager bmpProxyManager;
-
+    private BMPLittleProxyManager bmpProxyManager;
 
     @Before
     public void setUp() throws InterruptedException, IOException, URISyntaxException {
@@ -100,4 +99,15 @@ public abstract class ProxyManagerTest {
             rt.exec("kill -9 " + commandLine);
     }
 
+    protected BMPLittleProxyManager getBmpProxyManager() {
+        return bmpProxyManager;
+    }
+
+    protected static int getPORT() {
+        return PORT;
+    }
+
+    protected static String getADDRESS() {
+        return ADDRESS;
+    }
 }

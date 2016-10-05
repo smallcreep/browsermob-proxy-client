@@ -17,7 +17,14 @@ repositories {
 dependencies {
     testCompile 'junit:junit:4.11'
     testCompile 'net.lightbody.bmp:browsermob-rest:2.1.2'
+    testCompile 'com.mashape.unirest:unirest-java:1.4.9'
     compile 'net.lightbody.bmp:browsermob-core:2.1.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+}
+
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

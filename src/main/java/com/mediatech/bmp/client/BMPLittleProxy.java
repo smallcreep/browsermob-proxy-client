@@ -16,6 +16,12 @@
 
 package com.mediatech.bmp.client;
 
+import com.mediatech.bmp.client.parameters.BMPHarParameters;
+import com.mediatech.bmp.client.parameters.BMPPageParameters;
+import net.lightbody.bmp.core.har.Har;
+
+import java.io.IOException;
+
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
@@ -29,11 +35,45 @@ public class BMPLittleProxy extends BMPProxy {
         super(port);
     }
 
-    public BMPLittleProxy(int port, String adsress) {
-        super(port, adsress);
+    public BMPLittleProxy(int port, String proxyManagerAddress, int proxyManagerPort) {
+        super(port, proxyManagerAddress, proxyManagerPort);
     }
 
-    public BMPLittleProxy(int port, String adsress, String protocol) {
-        super(port, adsress, protocol);
+    public BMPLittleProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort) {
+        super(port, address, proxyManagerAddress, proxyManagerPort);
+    }
+
+    public BMPLittleProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort, String protocol) {
+        super(port, address, proxyManagerAddress, proxyManagerPort, protocol);
+    }
+
+    @Override
+    public void createNewHar() throws IOException {
+        getBmpProxyServices().startHar(getPort()).execute();
+    }
+
+    @Override
+    public void createNewHar(BMPHarParameters bmpHarParameters) {
+
+    }
+
+    @Override
+    public void createNewPage() {
+
+    }
+
+    @Override
+    public void createNewPage(BMPPageParameters bmpPageParameters) {
+
+    }
+
+    @Override
+    public void destroy() throws IOException {
+        getBmpProxyServices().destroy(getPort()).execute();
+    }
+
+    @Override
+    public Har getHar() throws IOException {
+        return getBmpProxyServices().getHar(getPort()).execute().body();
     }
 }

@@ -49,24 +49,31 @@ public class BMPLittleProxyManager extends BMPProxyManager {
 
     @Override
     public BMPLittleProxy start(BMPProxyParameters bmpProxyParameters) throws IOException {
-        BMPLittleProxy result;
-        if (bmpProxyParameters != null) {
-            if (bmpProxyParameters.getPort() != -1) {
-                result = getBmpProxyManagerServices()
-                        .proxyStart(bmpProxyParameters.getPort(), bmpProxyParameters.getBindAddress())
-                        .execute().body();
-            }
-            else {
-                result = getBmpProxyManagerServices()
-                        .proxyStart(bmpProxyParameters.getBindAddress())
-                        .execute().body();
-            }
-            if (bmpProxyParameters.getBindAddress() != null) {
-                result.setAdsress(bmpProxyParameters.getBindAddress());
-            }
-        } else {
+        BMPLittleProxy result = new BMPLittleProxy();
+        if (bmpProxyParameters == null) {
             result = getBmpProxyManagerServices().proxyStart().execute().body();
+        } else {
+            if (bmpProxyParameters.getBindAddress() == null) {
+                if (bmpProxyParameters.getPort() == -1) {
+                    result = getBmpProxyManagerServices().proxyStart().execute().body();
+                } else {
+                    result = getBmpProxyManagerServices()
+                            .proxyStart(bmpProxyParameters.getPort(), null).execute().body();
+                }
+            } else {
+                if (bmpProxyParameters.getPort() == -1) {
+                    result = getBmpProxyManagerServices()
+                            .proxyStart(bmpProxyParameters.getBindAddress()).execute().body();
+                } else {
+                    result = getBmpProxyManagerServices()
+                            .proxyStart(bmpProxyParameters.getPort(), bmpProxyParameters.getBindAddress())
+                            .execute().body();
+                }
+                result.setAddress(bmpProxyParameters.getBindAddress());
+            }
         }
+        result.setProxyManagerAddress(getAddress());
+        result.setProxyManagerPort(getPort());
         return result;
     }
 
@@ -77,11 +84,11 @@ public class BMPLittleProxyManager extends BMPProxyManager {
 
     @Override
     public BMPLittleProxy startWithProxyManager() throws IOException {
-        return start(new BMPProxyParameters(getAdsress()));
+        return start(new BMPProxyParameters(getAddress()));
     }
 
     @Override
     public BMPLittleProxy startWithProxyManager(int port) throws IOException {
-        return start(new BMPProxyParameters(port, getAdsress()));
+        return start(new BMPProxyParameters(port, getAddress()));
     }
 }

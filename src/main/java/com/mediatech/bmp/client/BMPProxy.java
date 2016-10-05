@@ -16,31 +16,53 @@
 
 package com.mediatech.bmp.client;
 
+import com.mediatech.bmp.client.parameters.BMPHarParameters;
+import com.mediatech.bmp.client.parameters.BMPPageParameters;
+import net.lightbody.bmp.core.har.Har;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+import java.io.IOException;
+
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
 public abstract class BMPProxy {
 
     private int port;
-    private String adsress = "localhost";
+    private String address = "localhost";
+    private String proxyManagerAddress = "localhost";
+    private int proxyManagerPort = 8080;
     private String protocol = "http";
+    private BMPProxyServices bmpProxyServices;
+    private static String PATH_PROXY = "/proxy/";
 
     public BMPProxy() {
     }
 
     public BMPProxy(int port) {
-        this.port = port;
+        setPort(port);
     }
 
-    public BMPProxy(int port, String adsress) {
-        this.port = port;
-        this.adsress = adsress;
+    public BMPProxy(int port, String proxyManagerAddress, int proxyManagerPort) {
+        setPort(port);
+        setProxyManagerAddress(proxyManagerAddress);
+        setProxyManagerPort(proxyManagerPort);
     }
 
-    public BMPProxy(int port, String adsress, String protocol) {
-        this.port = port;
-        this.adsress = adsress;
-        this.protocol = protocol;
+    public BMPProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort) {
+        setPort(port);
+        setAddress(address);
+        setProxyManagerAddress(proxyManagerAddress);
+        setProxyManagerPort(proxyManagerPort);
+    }
+
+    public BMPProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort, String protocol) {
+        setPort(port);
+        setAddress(address);
+        setProxyManagerAddress(proxyManagerAddress);
+        setProxyManagerPort(proxyManagerPort);
+        setProtocol(protocol);
     }
 
     public int getPort() {
@@ -51,12 +73,32 @@ public abstract class BMPProxy {
         this.port = port;
     }
 
-    public String getAdsress() {
-        return adsress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdsress(String adsress) {
-        this.adsress = adsress;
+    public void setAddress(String address) {
+        if (!address.isEmpty()) {
+            this.address = address;
+        }
+    }
+
+    public String getProxyManagerAddress() {
+        return proxyManagerAddress;
+    }
+
+    public void setProxyManagerAddress(String proxyManagerAddress) {
+        if (proxyManagerAddress != null) {
+            this.proxyManagerAddress = proxyManagerAddress;
+        }
+    }
+
+    public int getProxyManagerPort() {
+        return proxyManagerPort;
+    }
+
+    public void setProxyManagerPort(int proxyManagerPort) {
+        this.proxyManagerPort = proxyManagerPort;
     }
 
     public String getProtocol() {
@@ -64,8 +106,38 @@ public abstract class BMPProxy {
     }
 
     public void setProtocol(String protocol) {
-        this.protocol = protocol;
+        if (!protocol.isEmpty()) {
+            this.protocol = protocol;
+        }
     }
+
+    public BMPProxyServices getBmpProxyServices() {
+        if (bmpProxyServices == null) {
+            lazyInitializeBMPProxyServices();
+        }
+        return bmpProxyServices;
+    }
+
+    protected void lazyInitializeBMPProxyServices() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(String.format("%s://%s:%s%s", protocol, proxyManagerAddress, proxyManagerPort, PATH_PROXY))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        bmpProxyServices = retrofit.create(BMPProxyServices.class);
+    }
+
+    public abstract void createNewHar() throws IOException;
+
+    public abstract void createNewHar(BMPHarParameters bmpHarParameters);
+
+    public abstract void createNewPage();
+
+    public abstract void createNewPage(BMPPageParameters bmpPageParameters);
+
+    public abstract void destroy() throws IOException;
+
+    public abstract Har getHar() throws IOException;
 
     @Override
     public boolean equals(Object o) {
@@ -75,7 +147,10 @@ public abstract class BMPProxy {
         BMPProxy bmpProxy = (BMPProxy) o;
 
         if (port != bmpProxy.port) return false;
-        if (adsress != null ? !adsress.equals(bmpProxy.adsress) : bmpProxy.adsress != null) return false;
+        if (proxyManagerPort != bmpProxy.proxyManagerPort) return false;
+        if (address != null ? !address.equals(bmpProxy.address) : bmpProxy.address != null) return false;
+        if (proxyManagerAddress != null ? !proxyManagerAddress.equals(bmpProxy.proxyManagerAddress) : bmpProxy.proxyManagerAddress != null)
+            return false;
         return protocol != null ? protocol.equals(bmpProxy.protocol) : bmpProxy.protocol == null;
 
     }
@@ -83,7 +158,9 @@ public abstract class BMPProxy {
     @Override
     public int hashCode() {
         int result = port;
-        result = 31 * result + (adsress != null ? adsress.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (proxyManagerAddress != null ? proxyManagerAddress.hashCode() : 0);
+        result = 31 * result + proxyManagerPort;
         result = 31 * result + (protocol != null ? protocol.hashCode() : 0);
         return result;
     }
@@ -92,7 +169,9 @@ public abstract class BMPProxy {
     public String toString() {
         return "BMPProxy{" +
                 "port=" + port +
-                ", adsress='" + adsress + '\'' +
+                ", address='" + address + '\'' +
+                ", proxyManagerAddress='" + proxyManagerAddress + '\'' +
+                ", proxyManagerPort=" + proxyManagerPort +
                 ", protocol='" + protocol + '\'' +
                 '}';
     }

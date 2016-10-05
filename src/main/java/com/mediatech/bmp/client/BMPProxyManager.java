@@ -29,58 +29,73 @@ import java.io.IOException;
 public abstract class BMPProxyManager {
 
     private int port = 8080;
-    private String adsress = "localhost";
+    private String address = "localhost";
     private String protocol = "http";
     private BMPProxyManagerServices bmpProxyManagerServices;
 
     BMPProxyManager() {
-        setBMPProxyManagerServices();
     }
 
-    private void setBMPProxyManagerServices() {
+    BMPProxyManager(int port) {
+        this.port = port;
+    }
+
+    public BMPProxyManager(int port, String address) {
+        setPort(port);
+        setAddress(address);
+    }
+
+    public BMPProxyManager(String address) {
+        setAddress(address);
+    }
+
+    public BMPProxyManager(int port, String address, String protocol) {
+        setPort(port);
+        setAddress(address);
+        setProtocol(protocol);
+    }
+
+    private void lazyInitializeBMPProxyManagerServices() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(String.format("%s://%s:%s", protocol, adsress, port))
+                .baseUrl(String.format("%s://%s:%s", protocol, address, port))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         bmpProxyManagerServices = retrofit.create(BMPProxyManagerServices.class);
     }
 
-    BMPProxyManager(int port) {
-        this.port = port;
-        setBMPProxyManagerServices();
-    }
-
-    BMPProxyManager(int port, String adsress) {
-        this.port = port;
-        this.adsress = adsress;
-        setBMPProxyManagerServices();
-    }
-
-    BMPProxyManager(String adsress) {
-        this.adsress = adsress;
-        setBMPProxyManagerServices();
-    }
-
-    public BMPProxyManager(int port, String adsress, String protocol) {
-        this.port = port;
-        this.adsress = adsress;
-        this.protocol = protocol;
-    }
-
     public int getPort() {
         return port;
     }
 
-    public String getAdsress() {
-        return adsress;
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        if (address != null) {
+            this.address = address;
+        }
     }
 
     public String getProtocol() {
         return protocol;
     }
 
-    BMPProxyManagerServices getBmpProxyManagerServices() {
+    public void setProtocol(String protocol) {
+        if (protocol != null) {
+            this.protocol = protocol;
+        }
+    }
+
+    protected BMPProxyManagerServices getBmpProxyManagerServices() {
+        if (bmpProxyManagerServices == null) {
+            lazyInitializeBMPProxyManagerServices();
+        }
         return bmpProxyManagerServices;
     }
 
