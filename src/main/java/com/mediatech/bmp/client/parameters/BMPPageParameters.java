@@ -16,78 +16,49 @@
 
 package com.mediatech.bmp.client.parameters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Ilia Rogozhin on 04.10.2016.
  */
 public class BMPPageParameters {
 
-    private boolean captureHeaders = false;
-    private boolean captureContent = false;
-    private boolean captureBinaryContent = false;
-    private String initialPageRef = "Page 1";
-    private String initialPageTitle = initialPageRef;
+    private String pageRef = "Page 0";
+    private String pageTitle = null;
 
-    public boolean isCaptureHeaders() {
-        return captureHeaders;
+    public BMPPageParameters(String pageRef, String pageTitle) {
+        this.pageRef = pageRef;
+        this.pageTitle = pageTitle;
     }
 
-    public void setCaptureHeaders(boolean captureHeaders) {
-        this.captureHeaders = captureHeaders;
-    }
-
-    public boolean isCaptureContent() {
-        return captureContent;
-    }
-
-    public void setCaptureContent(boolean captureContent) {
-        this.captureContent = captureContent;
-    }
-
-    public boolean isCaptureBinaryContent() {
-        return captureBinaryContent;
-    }
-
-    public void setCaptureBinaryContent(boolean captureBinaryContent) {
-        this.captureBinaryContent = captureBinaryContent;
-    }
-
-    public String getInitialPageRef() {
-        return initialPageRef;
-    }
-
-    public void setInitialPageRef(String initialPageRef) {
-        this.initialPageRef = initialPageRef;
-    }
-
-    public String getInitialPageTitle() {
-        return initialPageTitle;
-    }
-
-    public void setInitialPageTitle(String initialPageTitle) {
-        this.initialPageTitle = initialPageTitle;
-    }
-
-    public BMPPageParameters(boolean captureHeaders, boolean captureContent, boolean captureBinaryContent,
-                             String initialPageRef, String initialPageTitle) {
-        this.captureHeaders = captureHeaders;
-        this.captureContent = captureContent;
-        this.captureBinaryContent = captureBinaryContent;
-        this.initialPageRef = initialPageRef;
-        if (initialPageTitle.isEmpty()) {
-            this.initialPageTitle = this.initialPageRef;
-        } else {
-            this.initialPageTitle = initialPageTitle;
-        }
-    }
-
-    public BMPPageParameters(String initialPageRef, String initialPageTitle) {
-        this(false, false, false, initialPageRef, initialPageTitle);
-    }
-
-    public BMPPageParameters(String initialPageRef) {
-        this(initialPageRef, null);
+    public BMPPageParameters(String pageRef) {
+        this(pageRef, null);
     }
 
     public BMPPageParameters() {
+    }
+
+    public String getPageRef() {
+        return pageRef;
+    }
+
+    public void setPageRef(String pageRef) {
+        this.pageRef = pageRef;
+    }
+
+    public String getPageTitle() {
+        return pageTitle;
+    }
+
+    public void setPageTitle(String pageTitle) {
+        this.pageTitle = pageTitle;
+    }
+
+    public Map<String, String> getMapFields() {
+        Map<String, String> result = new HashMap<>();
+        if (pageRef != null) result.put("pageRef", pageRef);
+        if (pageTitle != null) result.put("pageTitle", pageTitle);
+        return result;
     }
 }

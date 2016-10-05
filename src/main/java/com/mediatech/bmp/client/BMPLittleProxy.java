@@ -16,11 +16,14 @@
 
 package com.mediatech.bmp.client;
 
+import com.mediatech.bmp.client.parameters.BMPDNSParameters;
 import com.mediatech.bmp.client.parameters.BMPHarParameters;
+import com.mediatech.bmp.client.parameters.BMPHeadersParameters;
 import com.mediatech.bmp.client.parameters.BMPPageParameters;
 import net.lightbody.bmp.core.har.Har;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
@@ -49,22 +52,24 @@ public class BMPLittleProxy extends BMPProxy {
 
     @Override
     public void createNewHar() throws IOException {
-        getBmpProxyServices().startHar(getPort()).execute();
+        createNewHar(null);
     }
 
     @Override
-    public void createNewHar(BMPHarParameters bmpHarParameters) {
-
+    public void createNewHar(BMPHarParameters bmpHarParameters) throws IOException {
+        if (bmpHarParameters == null) bmpHarParameters = new BMPHarParameters();
+        getBmpProxyServices().startHar(getPort(), bmpHarParameters.getMapFields()).execute();
     }
 
     @Override
-    public void createNewPage() {
-
+    public void createNewPage() throws IOException {
+        createNewPage(null);
     }
 
     @Override
-    public void createNewPage(BMPPageParameters bmpPageParameters) {
-
+    public void createNewPage(BMPPageParameters bmpPageParameters) throws IOException {
+        if (bmpPageParameters == null) bmpPageParameters = new BMPPageParameters();
+        getBmpProxyServices().startNewPage(getPort(), bmpPageParameters.getMapFields()).execute();
     }
 
     @Override
@@ -75,5 +80,17 @@ public class BMPLittleProxy extends BMPProxy {
     @Override
     public Har getHar() throws IOException {
         return getBmpProxyServices().getHar(getPort()).execute().body();
+    }
+
+    @Override
+    public void overridesDns(BMPDNSParameters bmpdnsParameters) throws IOException {
+        if (bmpdnsParameters == null) bmpdnsParameters = new BMPDNSParameters(new HashMap<>());
+        getBmpProxyServices().overridesDns(getPort(), bmpdnsParameters.getOverridesDNS()).execute();
+    }
+
+    @Override
+    public void overridesHeaders(BMPHeadersParameters bmpHeadersParameters) throws IOException {
+        if (bmpHeadersParameters == null) bmpHeadersParameters = new BMPHeadersParameters(new HashMap<>());
+        getBmpProxyServices().overridesHeaders(getPort(), bmpHeadersParameters.getOverridesHeaders()).execute();
     }
 }

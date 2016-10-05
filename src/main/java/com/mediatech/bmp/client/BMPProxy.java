@@ -16,8 +16,10 @@
 
 package com.mediatech.bmp.client;
 
-import com.mediatech.bmp.client.parameters.BMPHarParameters;
+import com.mediatech.bmp.client.parameters.BMPDNSParameters;
+import com.mediatech.bmp.client.parameters.BMPHeadersParameters;
 import com.mediatech.bmp.client.parameters.BMPPageParameters;
+import com.mediatech.bmp.client.parameters.BMPHarParameters;
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -129,13 +131,17 @@ public abstract class BMPProxy {
 
     public abstract void createNewHar() throws IOException;
 
-    public abstract void createNewHar(BMPHarParameters bmpHarParameters);
+    public abstract void createNewHar(BMPHarParameters bmpHarParameters) throws IOException;
 
-    public abstract void createNewPage();
+    public abstract void createNewPage() throws IOException;
 
-    public abstract void createNewPage(BMPPageParameters bmpPageParameters);
+    public abstract void createNewPage(BMPPageParameters bmpPageParameters) throws IOException;
 
     public abstract void destroy() throws IOException;
+
+    public abstract void overridesDns(BMPDNSParameters bmpdnsParameters) throws IOException;
+
+    public abstract void overridesHeaders(BMPHeadersParameters bmpHeadersParameters) throws IOException;
 
     public abstract Har getHar() throws IOException;
 

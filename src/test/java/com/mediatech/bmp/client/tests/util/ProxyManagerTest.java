@@ -53,10 +53,12 @@ public abstract class ProxyManagerTest {
             startJavaPIDs = getJavaPids();
         } else {
             url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy");
+            String commandLine = getComandLineChmod(url);
+            proc = Runtime.getRuntime().exec(commandLine);
         }
         String commandLine = getComandLineString(url);
         proc = Runtime.getRuntime().exec(commandLine);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         bmpProxyManager = new BMPLittleProxyManager(PORT, ADDRESS);
     }
 
@@ -81,9 +83,20 @@ public abstract class ProxyManagerTest {
 
     @NotNull
     private String getComandLineString(URL url) throws URISyntaxException {
-        Path resPath = java.nio.file.Paths.get(url.toURI());
+        Path resPath = getPath(url);
         this.commandLine = resPath.toString();
         return resPath.toString() + " -port " + PORT + " -address " + ADDRESS;
+    }
+
+    @NotNull
+    private String getComandLineChmod(URL url) throws URISyntaxException {
+        Path resPath = getPath(url);
+        this.commandLine = resPath.toString();
+        return "chmod +x " + resPath.toString();
+    }
+
+    private Path getPath(URL url) throws URISyntaxException {
+        return java.nio.file.Paths.get(url.toURI());
     }
 
     @After
@@ -96,7 +109,7 @@ public abstract class ProxyManagerTest {
                     rt.exec("taskkill /F /PID " + endJavaPID);
                 }
         } else
-            rt.exec("kill -9 " + commandLine);
+            proc.destroy();
     }
 
     protected BMPLittleProxyManager getBmpProxyManager() {

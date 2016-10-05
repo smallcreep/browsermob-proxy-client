@@ -16,15 +16,11 @@
 
 package com.mediatech.bmp.client;
 
-import com.mediatech.bmp.client.response.ProxyListDescriptor;
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.http.*;
-import retrofit2.http.Path;
 
-import java.nio.file.*;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
@@ -34,10 +30,20 @@ public interface BMPProxyServices {
     @DELETE("{port}")
     Call<Void> destroy(@Path("port") int port);
 
+    @FormUrlEncoded
     @PUT("{port}/har")
-    Call<Void> startHar(@Path("port") int port);
+    Call<Void> startHar(@Path("port") int port, @FieldMap Map<String, String> fields);
 
     @GET("{port}/har")
     Call<Har> getHar(@Path("port") int port);
 
+    @FormUrlEncoded
+    @PUT("{port}/har/pageRef")
+    Call<Void> startNewPage(@Path("port") int port, @FieldMap Map<String, String> fields);
+
+    @POST("{port}/hosts")
+    Call<Void> overridesDns(@Path("port") int port, @Body Map<String, String> body);
+
+    @POST("{port}/headers")
+    Call<Void> overridesHeaders(@Path("port") int port, @Body Map<String, String> body);
 }
