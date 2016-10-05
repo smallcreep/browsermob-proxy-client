@@ -14,13 +14,13 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.tests;
+package com.github.smallcreep.bmp.client.tests;
 
-import com.mediatech.bmp.client.BMPLittleProxy;
-import com.mediatech.bmp.client.parameters.BMPProxyParameters;
-import com.mediatech.bmp.client.response.ProxyDescriptor;
-import com.mediatech.bmp.client.response.ProxyListDescriptor;
-import com.mediatech.bmp.client.tests.util.ProxyManagerTest;
+import com.github.smallcreep.bmp.client.tests.util.ProxyManagerTest;
+import com.github.smallcreep.bmp.client.BMPLittleProxy;
+import com.github.smallcreep.bmp.client.parameters.BMPProxyParameters;
+import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
+import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;

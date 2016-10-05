@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.parameters;
+package com.github.smallcreep.bmp.client.parameters;
 
 import java.util.Map;
 

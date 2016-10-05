@@ -14,12 +14,12 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client;
+package com.github.smallcreep.bmp.client;
 
-import com.mediatech.bmp.client.parameters.BMPDNSParameters;
-import com.mediatech.bmp.client.parameters.BMPHeadersParameters;
-import com.mediatech.bmp.client.parameters.BMPPageParameters;
-import com.mediatech.bmp.client.parameters.BMPHarParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

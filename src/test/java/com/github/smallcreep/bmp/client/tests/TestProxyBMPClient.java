@@ -14,17 +14,17 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.tests;
+package com.github.smallcreep.bmp.client.tests;
 
 import com.mashape.unirest.http.Unirest;
-import com.mediatech.bmp.client.BMPLittleProxy;
-import com.mediatech.bmp.client.parameters.BMPDNSParameters;
-import com.mediatech.bmp.client.parameters.BMPHarParameters;
-import com.mediatech.bmp.client.parameters.BMPHeadersParameters;
-import com.mediatech.bmp.client.parameters.BMPPageParameters;
-import com.mediatech.bmp.client.response.ProxyDescriptor;
-import com.mediatech.bmp.client.response.ProxyListDescriptor;
-import com.mediatech.bmp.client.tests.util.ProxyTest;
+import com.github.smallcreep.bmp.client.BMPLittleProxy;
+import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
+import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
+import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
+import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
+import com.github.smallcreep.bmp.client.tests.util.ProxyTest;
 import net.lightbody.bmp.core.har.Har;
 import org.apache.http.HttpHost;
 import org.junit.Test;

@@ -14,29 +14,28 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.tests.util;
+package com.github.smallcreep.bmp.client;
 
-import com.mediatech.bmp.client.BMPLittleProxy;
-import org.junit.Before;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
+import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
+import retrofit2.Call;
+import retrofit2.http.*;
 
 /**
- * Created by Ilia Rogozhin on 04.10.2016.
+ * Created by Ilia Rogozhin on 02.10.2016.
  */
-public abstract class ProxyTest extends ProxyManagerTest {
+public interface BMPProxyManagerServices {
 
-    private BMPLittleProxy bmpLittleProxy;
+    @GET("/proxy")
+    Call<ProxyListDescriptor> proxyGet();
 
-    @Before
-    @Override
-    public void setUp() throws InterruptedException, IOException, URISyntaxException {
-        super.setUp();
-        bmpLittleProxy = getBmpProxyManager().startWithProxyManager();
-    }
+    @POST("/proxy")
+    Call<BMPLittleProxy> proxyStart();
 
-    protected BMPLittleProxy getBmpLittleProxy() {
-        return bmpLittleProxy;
-    }
+    @FormUrlEncoded
+    @POST("/proxy")
+    Call<BMPLittleProxy> proxyStart(@Field("port") int port, @Field("bindAddress") String bindAddress);
+
+    @FormUrlEncoded
+    @POST("/proxy")
+    Call<BMPLittleProxy> proxyStart(@Field("bindAddress") String bindAddress);
 }

@@ -14,30 +14,20 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.parameters;
+package com.github.smallcreep.bmp.client.response;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
-public class BMPProxyParameters {
+public class ProxyDescriptor {
 
-    private int port = -1;
-    private String bindAddress = null;
+    private int port;
 
-    public BMPProxyParameters() {
+    public ProxyDescriptor() {
     }
 
-    public BMPProxyParameters(String bindAddress) {
-        this.bindAddress = bindAddress;
-    }
-
-    public BMPProxyParameters(int port) {
+    public ProxyDescriptor(int port) {
         this.port = port;
-    }
-
-    public BMPProxyParameters(int port, String bindAddress) {
-        this.port = port;
-        this.bindAddress = bindAddress;
     }
 
     public int getPort() {
@@ -48,39 +38,26 @@ public class BMPProxyParameters {
         this.port = port;
     }
 
-    public String getBindAddress() {
-        return bindAddress;
-    }
-
-    public void setBindAddress(String bindAddress) {
-        this.bindAddress = bindAddress;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BMPProxyParameters that = (BMPProxyParameters) o;
+        ProxyDescriptor that = (ProxyDescriptor) o;
 
-        if (port != that.port) return false;
-        return bindAddress != null ? bindAddress.equals(that.bindAddress) : that.bindAddress == null;
+        return port == that.port;
 
     }
 
     @Override
     public int hashCode() {
-        int result = port;
-        result = 31 * result + (bindAddress != null ? bindAddress.hashCode() : 0);
-        return result;
+        return port;
     }
 
     @Override
     public String toString() {
-        return "BMPProxyParameters{" +
+        return "ProxyDescriptor{" +
                 "port=" + port +
-                ", bindAddress='" + bindAddress + '\'' +
                 '}';
     }
-
 }

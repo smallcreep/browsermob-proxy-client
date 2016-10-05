@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client;
+package com.github.smallcreep.bmp.client;
 
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Call;

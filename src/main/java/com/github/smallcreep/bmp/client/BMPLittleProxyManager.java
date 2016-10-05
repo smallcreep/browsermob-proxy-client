@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client;
+package com.github.smallcreep.bmp.client;
 
-import com.mediatech.bmp.client.parameters.BMPProxyParameters;
-import com.mediatech.bmp.client.response.ProxyListDescriptor;
+import com.github.smallcreep.bmp.client.parameters.BMPProxyParameters;
+import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 
 import java.io.IOException;
 

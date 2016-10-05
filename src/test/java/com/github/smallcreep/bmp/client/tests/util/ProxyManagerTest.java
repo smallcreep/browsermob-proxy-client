@@ -14,12 +14,12 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.tests.util;
+package com.github.smallcreep.bmp.client.tests.util;
 
-import com.mediatech.bmp.client.BMPLittleProxy;
-import com.mediatech.bmp.client.BMPLittleProxyManager;
-import com.mediatech.bmp.client.response.ProxyDescriptor;
-import com.mediatech.bmp.client.response.ProxyListDescriptor;
+import com.github.smallcreep.bmp.client.BMPLittleProxy;
+import com.github.smallcreep.bmp.client.BMPLittleProxyManager;
+import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
+import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import org.junit.After;
 import org.junit.Before;
 

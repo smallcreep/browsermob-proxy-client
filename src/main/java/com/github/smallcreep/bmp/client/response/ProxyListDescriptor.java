@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.mediatech.bmp.client.response;
+package com.github.smallcreep.bmp.client.response;
 
 import java.util.ArrayList;
 import java.util.Collection;

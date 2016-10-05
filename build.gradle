@@ -1,4 +1,4 @@
-group 'com.mediatech.bmp.client'
+group 'com.github.smallcreep'
 version '1.0-SNAPSHOT'
 
 task wrapper(type: Wrapper) {
@@ -7,6 +7,7 @@ task wrapper(type: Wrapper) {
 }
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 
@@ -25,6 +26,7 @@ dependencies {
 
 task fatJar(type: Jar) {
     baseName = project.name + '-all'
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
