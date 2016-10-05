@@ -32,3 +32,4 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 *.log
 !/src/test/resources/browsermob-proxy-2.1.2/*
+!/src/test/resources/browsermob-proxy-2.1.2/lib/browsermob-dist-2.1.2.jar
