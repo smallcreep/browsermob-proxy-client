@@ -20,6 +20,8 @@ import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.util.Map;
+
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
@@ -28,14 +30,7 @@ public interface BMPProxyManagerServices {
     @GET("/proxy")
     Call<ProxyListDescriptor> proxyGet();
 
-    @POST("/proxy")
-    Call<BMPLittleProxy> proxyStart();
-
     @FormUrlEncoded
     @POST("/proxy")
-    Call<BMPLittleProxy> proxyStart(@Field("port") int port, @Field("bindAddress") String bindAddress);
-
-    @FormUrlEncoded
-    @POST("/proxy")
-    Call<BMPLittleProxy> proxyStart(@Field("bindAddress") String bindAddress);
+    Call<BMPLittleProxy> proxyStart(@FieldMap Map<String, String> fields);
 }

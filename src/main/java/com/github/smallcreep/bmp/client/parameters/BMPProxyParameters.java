@@ -16,6 +16,9 @@
 
 package com.github.smallcreep.bmp.client.parameters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
@@ -54,6 +57,13 @@ public class BMPProxyParameters {
 
     public void setBindAddress(String bindAddress) {
         this.bindAddress = bindAddress;
+    }
+
+    public Map<String, String> getFields() {
+        Map<String, String> result = new HashMap<>();
+        if (port != -1) result.put("port", Integer.toString(port));
+        if (bindAddress != null) result.put("bindAddress", bindAddress);
+        return result;
     }
 
     @Override
