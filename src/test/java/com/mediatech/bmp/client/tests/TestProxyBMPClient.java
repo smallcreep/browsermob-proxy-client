@@ -167,11 +167,11 @@ public class TestProxyBMPClient extends ProxyTest {
         BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Map<String, String> overridesDNS = new HashMap<>();
-        overridesDNS.put("local.terraclicks.com","192.168.118.36");
+        overridesDNS.put("google.com","127.0.0.1");
         BMPDNSParameters bmpdnsParameters = new BMPDNSParameters(overridesDNS);
         getBmpLittleProxy().overridesDns(bmpdnsParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://local.terraclicks.com").asString();
+        Unirest.get("http://google.com").asString();
 
         Har harActual = getBmpLittleProxy().getHar();
 
