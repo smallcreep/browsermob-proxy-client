@@ -41,7 +41,6 @@ public abstract class ProxyManagerTest {
     private Process proc = null;
     private static int PORT = 8080;
     private static String ADDRESS = "127.0.0.1";
-    private String commandLine;
     private List<Integer> startJavaPIDs;
     private BMPLittleProxyManager bmpProxyManager;
 
@@ -52,13 +51,17 @@ public abstract class ProxyManagerTest {
             url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy.bat");
             startJavaPIDs = getJavaPids();
         } else {
+            System.out.println("BMP CLIENT DEBUG: " + "CHANGE LINUX");
             url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy");
             String commandLine = getComandLineChmod(url);
+            System.out.println("BMP CLIENT DEBUG: " + "ADD PERMISSIONS TO START PROXY '" + commandLine + "'");
             proc = Runtime.getRuntime().exec(commandLine);
         }
         String commandLine = getComandLineString(url);
+        System.out.println("BMP CLIENT DEBUG: " + "START PROXY WITH COMMAND LINE '" + commandLine + "'");
         proc = Runtime.getRuntime().exec(commandLine);
         Thread.sleep(2000);
+        System.out.println("BMP CLIENT DEBUG: " + "THREAD SLEEP");
         bmpProxyManager = new BMPLittleProxyManager(PORT, ADDRESS);
     }
 
@@ -84,14 +87,12 @@ public abstract class ProxyManagerTest {
     @NotNull
     private String getComandLineString(URL url) throws URISyntaxException {
         Path resPath = getPath(url);
-        this.commandLine = resPath.toString();
         return resPath.toString() + " -port " + PORT + " -address " + ADDRESS;
     }
 
     @NotNull
     private String getComandLineChmod(URL url) throws URISyntaxException {
         Path resPath = getPath(url);
-        this.commandLine = resPath.toString();
         return "chmod +x " + resPath.toString();
     }
 
