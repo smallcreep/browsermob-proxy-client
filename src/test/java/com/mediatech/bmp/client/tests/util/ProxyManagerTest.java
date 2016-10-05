@@ -16,102 +16,24 @@
 
 package com.mediatech.bmp.client.tests.util;
 
+import com.mediatech.bmp.client.BMPLittleProxy;
 import com.mediatech.bmp.client.BMPLittleProxyManager;
-import org.jetbrains.annotations.NotNull;
+import com.mediatech.bmp.client.response.ProxyDescriptor;
+import com.mediatech.bmp.client.response.ProxyListDescriptor;
 import org.junit.After;
 import org.junit.Before;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
  */
 public abstract class ProxyManagerTest {
 
-    private Process proc = null;
     private static int PORT = 8080;
     private static String ADDRESS = "127.0.0.1";
-    private List<Integer> startJavaPIDs;
     private BMPLittleProxyManager bmpProxyManager;
-
-    @Before
-    public void setUp() throws InterruptedException, IOException, URISyntaxException {
-        URL url;
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy.bat");
-            startJavaPIDs = getJavaPids();
-        } else {
-            url = getClass().getResource("/browsermob-proxy-2.1.2/bin/browsermob-proxy");
-            String commandLine = getComandLineChmod(url);
-            proc = Runtime.getRuntime().exec(commandLine);
-        }
-        String commandLine = getComandLineString(url);
-        proc = Runtime.getRuntime().exec(commandLine);
-        Thread.sleep(2000);
-        bmpProxyManager = new BMPLittleProxyManager(PORT, ADDRESS);
-    }
-
-    private List<Integer> getJavaPids() throws IOException {
-        List<Integer> result = new ArrayList<>();
-        Runtime rt = Runtime.getRuntime();
-        Process process = rt.exec("tasklist /FI \"imagename eq java.exe\"");
-        InputStream stdout = process.getInputStream();
-        String line;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stdout));
-        while ((line = reader.readLine()) != null) {
-            if (line.startsWith("java.exe")) {
-                Pattern pattern = Pattern.compile("^java.exe(\\D*)(\\d+)(.*)Console(.*)$");
-                Matcher matcher = pattern.matcher(line);
-                if (matcher.find()) {
-                    result.add(Integer.valueOf(matcher.group(2)));
-                }
-            }
-        }
-        return result;
-    }
-
-    @NotNull
-    private String getComandLineString(URL url) throws URISyntaxException {
-        Path resPath = getPath(url);
-        return resPath.toString() + " -port " + PORT + " -address " + ADDRESS;
-    }
-
-    @NotNull
-    private String getComandLineChmod(URL url) throws URISyntaxException {
-        Path resPath = getPath(url);
-        return "chmod +x " + resPath.toString();
-    }
-
-    private Path getPath(URL url) throws URISyntaxException {
-        return java.nio.file.Paths.get(url.toURI());
-    }
-
-    @After
-    public void tearDown() throws InterruptedException, IOException {
-        Runtime rt = Runtime.getRuntime();
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            List<Integer> endJavaPIDs = getJavaPids();
-            for (Integer endJavaPID : endJavaPIDs)
-                if (!startJavaPIDs.contains(endJavaPID)) {
-                    rt.exec("taskkill /F /PID " + endJavaPID);
-                }
-        } else
-            proc.destroy();
-    }
-
-    protected BMPLittleProxyManager getBmpProxyManager() {
-        return bmpProxyManager;
-    }
 
     protected static int getPORT() {
         return PORT;
@@ -119,5 +41,23 @@ public abstract class ProxyManagerTest {
 
     protected static String getADDRESS() {
         return ADDRESS;
+    }
+
+    @Before
+    public void setUp() throws InterruptedException, IOException, URISyntaxException {
+        bmpProxyManager = new BMPLittleProxyManager(PORT, ADDRESS);
+    }
+
+    @After
+    public void tearDown() throws InterruptedException, IOException {
+        ProxyListDescriptor proxyListDescriptor = bmpProxyManager.getProxies();
+        for (ProxyDescriptor proxyListElement : proxyListDescriptor.getProxyList()) {
+            new BMPLittleProxy(proxyListElement.getPort(), ADDRESS, ADDRESS, PORT).destroy();
+        }
+
+    }
+
+    protected BMPLittleProxyManager getBmpProxyManager() {
+        return bmpProxyManager;
     }
 }

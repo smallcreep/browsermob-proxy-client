@@ -67,8 +67,8 @@ public class TestProxyBMPClient extends ProxyTest {
     public void testDeleteProxy(final int testData) throws Throwable {
         ProxyListDescriptor proxyListDescriptorExpected = new ProxyListDescriptor();
         for (int i = 0; i < testData; i++) {
-            BMPLittleProxy bmpLittleProxyActual = getBmpProxyManager().startWithProxyManager();
             int port = getPORT() + i + 2;
+            BMPLittleProxy bmpLittleProxyActual = getBmpProxyManager().startWithProxyManager(port);
             BMPLittleProxy bmpLittleProxyExpected = new BMPLittleProxy(port, getADDRESS(), getADDRESS(), getPORT());
             assertEquals(bmpLittleProxyExpected, bmpLittleProxyActual);
             proxyListDescriptorExpected.getProxyList().add(new ProxyDescriptor(port));

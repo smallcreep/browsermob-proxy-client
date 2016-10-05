@@ -48,7 +48,9 @@ public class ProxyListDescriptor {
 
         ProxyListDescriptor that = (ProxyListDescriptor) o;
 
-        return proxyList != null ? proxyList.equals(that.proxyList) : that.proxyList == null;
+
+        return proxyList != null ? (proxyList.containsAll(that.proxyList) && that.proxyList.containsAll(proxyList))
+                : that.proxyList == null;
 
     }
 
