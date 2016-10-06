@@ -16,7 +16,6 @@
 
 package com.github.smallcreep.bmp.client.tests;
 
-import com.mashape.unirest.http.Unirest;
 import com.github.smallcreep.bmp.client.BMPLittleProxy;
 import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
 import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
@@ -25,7 +24,10 @@ import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
 import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
 import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import com.github.smallcreep.bmp.client.tests.util.ProxyTest;
+import com.mashape.unirest.http.Unirest;
 import net.lightbody.bmp.core.har.Har;
+import net.lightbody.bmp.core.har.HarEntry;
+import net.lightbody.bmp.core.har.HarNameValuePair;
 import org.apache.http.HttpHost;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -37,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Ilia Rogozhin on 04.10.2016.
@@ -44,18 +47,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Theories.class)
 public class TestProxyBMPClient extends ProxyTest {
 
-    private static String EXPECTED_LOG_VERSION = "1.2";
-
-    private static String EXPECTED_LOG_CREATOR_NAME = "BrowserMob Proxy";
-    private static String EXPECTED_LOG_CREATOR_VERSION = "2.1.2";
-    private static String EXPECTED_LOG_CREATOR_COMMENT = "";
-
-    private static String EXPECTED_LOG_BROWSER_NAME = "unknown";
-    private static String EXPECTED_LOG_BROWSER_VERSION = "";
-    private static String EXPECTED_LOG_BROWSER_COMMENT = "";
-
-
-
+    public static final String HEADER_NAME_1 = "User-Agent";
+    public static final String HEADER_VALUE_1 = "BrowserMob-Agent";
+    public static final String HEADER_NAME_2 = "Test";
+    public static final String HEADER_VALUE_2 = "Test";
+    public static final String PAGE_ID_FOR_TEST = "Page 2";
     @DataPoints
     public static int[] testData = new int[]{
             0,
@@ -80,135 +76,98 @@ public class TestProxyBMPClient extends ProxyTest {
 
     @Test
     public void testHarWithoutParameters() throws Throwable {
+        Har harExpected = getHarExpected();
         getBmpLittleProxy().createNewHar();
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://google.com").asString();
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(null, null));
+        harExpected.getLog().addEntry(getHarEntry(null));
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
 
     @Test
     public void testHarWithParameters() throws Throwable {
-        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
+        Har harExpected = getHarExpected();
+        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, PAGE_ID_FOR_TEST, null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://google.com").asString();
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
+        harExpected.getLog().addEntry(getHarEntry(PAGE_ID_FOR_TEST));
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
 
     @Test
     public void testHarWithParametersAndNewPage() throws Throwable {
-        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
+        Har harExpected = getHarExpected();
+        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, PAGE_ID_FOR_TEST, null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://google.com").asString();
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
+        harExpected.getLog().addEntry(getHarEntry(PAGE_ID_FOR_TEST));
         getBmpLittleProxy().createNewPage();
-        Unirest.get("http://google.com").asString();
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(null, null));
+        harExpected.getLog().addEntry(getHarEntry(null));
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
 
     @Test
     public void testHarWithParametersAndNewPageWithParameters() throws Throwable {
-        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
+        Har harExpected = getHarExpected();
+        String pageRef = "Page 3";
+        String pageTitle = "Page 333";
+        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, PAGE_ID_FOR_TEST, null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://google.com").asString();
-        BMPPageParameters bmpPageParameters = new BMPPageParameters("Page 3", "Page 333");
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
+        harExpected.getLog().addEntry(getHarEntry(PAGE_ID_FOR_TEST));
+        BMPPageParameters bmpPageParameters = new BMPPageParameters(pageRef, pageTitle);
         getBmpLittleProxy().createNewPage(bmpPageParameters);
-        Unirest.get("http://google.com").asString();
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(pageRef, pageTitle));
+        harExpected.getLog().addEntry(getHarEntry(pageRef));
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
 
     @Test
     public void testOverridesDNS() throws Throwable {
-        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
+        Har harExpected = getHarExpected();
+        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, PAGE_ID_FOR_TEST, null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Map<String, String> overridesDNS = new HashMap<>();
-        overridesDNS.put("google.com","127.0.0.1");
+        overridesDNS.put(URL_FOR_TEST, getADDRESS());
         BMPDNSParameters bmpdnsParameters = new BMPDNSParameters(overridesDNS);
         getBmpLittleProxy().overridesDns(bmpdnsParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://google.com").asString();
-
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
+        HarEntry harEntryExpected = getHarEntry(PAGE_ID_FOR_TEST);
+        harEntryExpected.setServerIPAddress(getADDRESS());
+        harExpected.getLog().addEntry(harEntryExpected);
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
 
     @Test
     public void testOverridesHeaders() throws Throwable {
-        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, "Page 2", null);
+        Har harExpected = getHarExpected();
+        BMPHarParameters bmpHarParameters = new BMPHarParameters(true, true, true, PAGE_ID_FOR_TEST, null);
         getBmpLittleProxy().createNewHar(bmpHarParameters);
         Map<String, String> overridesHeaders = new HashMap<>();
-        overridesHeaders.put("User-Agent","BrowserMob-Agent");
+        overridesHeaders.put(HEADER_NAME_1, HEADER_VALUE_1);
+        overridesHeaders.put(HEADER_NAME_2, HEADER_VALUE_2);
         BMPHeadersParameters bmpHeadersParameters = new BMPHeadersParameters(overridesHeaders);
         getBmpLittleProxy().overridesHeaders(bmpHeadersParameters);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
-        Unirest.get("http://local.terraclicks.com").asString();
-
-        Har harActual = getBmpLittleProxy().getHar();
-
-        assertEquals(EXPECTED_LOG_VERSION, harActual.getLog().getVersion());
-
-        assertEquals(EXPECTED_LOG_CREATOR_NAME, harActual.getLog().getCreator().getName());
-        assertEquals(EXPECTED_LOG_CREATOR_VERSION, harActual.getLog().getCreator().getVersion());
-        assertEquals(EXPECTED_LOG_CREATOR_COMMENT, harActual.getLog().getCreator().getComment());
-
-        assertEquals(EXPECTED_LOG_BROWSER_NAME, harActual.getLog().getBrowser().getName());
-        assertEquals(EXPECTED_LOG_BROWSER_VERSION, harActual.getLog().getBrowser().getVersion());
-        assertEquals(EXPECTED_LOG_BROWSER_COMMENT, harActual.getLog().getBrowser().getComment());
-
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
+        harExpected.getLog().addEntry(getHarEntry(PAGE_ID_FOR_TEST));
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
+        assertTrue(getBmpLittleProxy().getHar().getLog().getEntries().get(0).getRequest().getHeaders()
+                .contains(new HarNameValuePair(HEADER_NAME_1, HEADER_VALUE_1)));
+        assertTrue(getBmpLittleProxy().getHar().getLog().getEntries().get(0).getRequest().getHeaders()
+                .contains(new HarNameValuePair(HEADER_NAME_2, HEADER_VALUE_2)));
     }
 }
