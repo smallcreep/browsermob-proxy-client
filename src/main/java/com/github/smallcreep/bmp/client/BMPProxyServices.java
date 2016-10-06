@@ -46,4 +46,7 @@ public interface BMPProxyServices {
 
     @POST("{port}/headers")
     Call<Void> overridesHeaders(@Path("port") int port, @Body Map<String, String> body);
+
+    @DELETE("{port}/dns/cache")
+    Call<Void> resetDNSCache(@Path("port") int port);
 }
