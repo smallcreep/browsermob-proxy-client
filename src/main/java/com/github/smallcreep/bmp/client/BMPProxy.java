@@ -145,6 +145,8 @@ public abstract class BMPProxy {
 
     public abstract Har getHar() throws IOException;
 
+    public abstract void resetDNSCache() throws IOException;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

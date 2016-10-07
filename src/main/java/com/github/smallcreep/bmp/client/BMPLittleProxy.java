@@ -30,22 +30,54 @@ import java.util.HashMap;
  */
 public class BMPLittleProxy extends BMPProxy {
 
+    /**
+     * Instantiates a new Bmp little proxy.
+     */
     public BMPLittleProxy() {
         super();
     }
 
+    /**
+     * Instantiates a new Bmp little proxy.
+     *
+     * @param port the port
+     */
     public BMPLittleProxy(int port) {
         super(port);
     }
 
+    /**
+     * Instantiates a new Bmp little proxy.
+     *
+     * @param port                the port
+     * @param proxyManagerAddress the proxy manager address
+     * @param proxyManagerPort    the proxy manager port
+     */
     public BMPLittleProxy(int port, String proxyManagerAddress, int proxyManagerPort) {
         super(port, proxyManagerAddress, proxyManagerPort);
     }
 
+    /**
+     * Instantiates a new Bmp little proxy.
+     *
+     * @param port                the port
+     * @param address             the address
+     * @param proxyManagerAddress the proxy manager address
+     * @param proxyManagerPort    the proxy manager port
+     */
     public BMPLittleProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort) {
         super(port, address, proxyManagerAddress, proxyManagerPort);
     }
 
+    /**
+     * Instantiates a new Bmp little proxy.
+     *
+     * @param port                the port
+     * @param address             the address
+     * @param proxyManagerAddress the proxy manager address
+     * @param proxyManagerPort    the proxy manager port
+     * @param protocol            the protocol
+     */
     public BMPLittleProxy(int port, String address, String proxyManagerAddress, int proxyManagerPort, String protocol) {
         super(port, address, proxyManagerAddress, proxyManagerPort, protocol);
     }
@@ -92,5 +124,10 @@ public class BMPLittleProxy extends BMPProxy {
     public void overridesHeaders(BMPHeadersParameters bmpHeadersParameters) throws IOException {
         if (bmpHeadersParameters == null) bmpHeadersParameters = new BMPHeadersParameters(new HashMap<>());
         getBmpProxyServices().overridesHeaders(getPort(), bmpHeadersParameters.getOverridesHeaders()).execute();
+    }
+
+    @Override
+    public void resetDNSCache() throws IOException {
+        getBmpProxyServices().resetDNSCache(getPort()).execute();
     }
 }
