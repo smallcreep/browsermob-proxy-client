@@ -1,12 +1,14 @@
 group 'com.github.smallcreep'
-version '0.2'
+version '0.2.1'
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '3.1'
-  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    gradleVersion = '3.1'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 
@@ -21,4 +23,75 @@ dependencies {
     compile 'net.lightbody.bmp:browsermob-core:2.1.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+}
+
+def isMavenDeployable = hasProperty('mavenRepositoryUrl')
+
+if (isMavenDeployable) {
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name 'BrowserMob Proxy Client'
+                    packaging 'jar'
+                    // optionally artifactId can be defined here
+                    description 'Rest client for BrowserMob proxy https://github.com/lightbody/browsermob-proxy'
+                    url 'https://github.com/smallcreep/browsermob-proxy-client'
+
+                    scm {
+                        connection 'scm:git@github.com:smallcreep/browsermob-proxy-client.git'
+                        developerConnection 'scm:git@github.com:smallcreep/browsermob-proxy-client.git/'
+                        url 'scm:git@github.com:smallcreep/browsermob-proxy-client.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'smallcreep'
+                            name 'Ilia Rogozhin'
+                            email 'ilia.rogozhin@gmail.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
