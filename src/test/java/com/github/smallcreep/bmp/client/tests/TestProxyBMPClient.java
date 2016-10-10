@@ -46,6 +46,7 @@ import java.util.Map;
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS;
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_MAX_AGE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -219,5 +220,55 @@ public class TestProxyBMPClient extends ProxyTest {
         assertEquals(HttpResponseStatus.FORBIDDEN.reasonPhrase(), response.getStatusText());
         assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
         assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
+    }
+
+    @Test
+    public void testOverridesResponseAsResponseFilterAndListUrl() throws Throwable {
+        Headers headersExpected = new Headers();
+        List<String> accessControlAllowCredentialsList = new ArrayList<>();
+        accessControlAllowCredentialsList.add("test");
+        accessControlAllowCredentialsList.add("test2");
+        headersExpected.put(ACCESS_CONTROL_ALLOW_CREDENTIALS, accessControlAllowCredentialsList);
+        List<String> accessControlMaxAgeList = new ArrayList<>();
+        accessControlMaxAgeList.add("test3");
+        headersExpected.put(ACCESS_CONTROL_MAX_AGE, accessControlMaxAgeList);
+        io.netty.handler.codec.http.HttpResponse responseOverrides = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN);
+        for (String headers : headersExpected.keySet()) {
+            for (String headersValue : headersExpected.get(headers)) {
+                responseOverrides.headers().add(headers, headersValue);
+            }
+        }
+        HttpMessageContents contents = new HttpMessageContents(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN));
+        contents.setTextContents("<html><body>Response successfully intercepted</body></html>");
+        List<String> overrideUrls = new ArrayList<>();
+        overrideUrls.add("(.*)index\\.html(.*)");
+        overrideUrls.add(URL_PROTOCOL + URL_FOR_TEST);
+        BMPResponseFilter bmpResponseFilter = new BMPResponseFilter(responseOverrides, contents, null, overrideUrls);
+        getBmpLittleProxy().setFilterResponse(bmpResponseFilter);
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+
+        HttpResponse<String> response = Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        assertEquals("<html><body>Response successfully intercepted</body></html>", response.getBody());
+        assertEquals(HttpResponseStatus.FORBIDDEN.code(), response.getStatus());
+        assertEquals(HttpResponseStatus.FORBIDDEN.reasonPhrase(), response.getStatusText());
+        assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
+
+        response = Unirest.get("http://abracadabra.alibaba" + "/index.html").asString();
+        assertEquals("<html><body>Response successfully intercepted</body></html>", response.getBody());
+        assertEquals(HttpResponseStatus.FORBIDDEN.code(), response.getStatus());
+        assertEquals(HttpResponseStatus.FORBIDDEN.reasonPhrase(), response.getStatusText());
+        assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
+
+        response = Unirest.get("http://abracadabra.alibaba").asString();
+        assertEquals("", response.getBody());
+        assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatus());
+        assertEquals(HttpResponseStatus.NOT_FOUND.reasonPhrase(), response.getStatusText());
+        assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_MAX_AGE));
+
     }
 }

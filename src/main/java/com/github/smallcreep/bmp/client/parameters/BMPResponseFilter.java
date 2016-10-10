@@ -16,11 +16,14 @@
 
 package com.github.smallcreep.bmp.client.parameters;
 
+import com.sun.xml.internal.ws.api.ha.StickyFeature;
 import io.netty.handler.codec.http.HttpResponse;
 import net.lightbody.bmp.util.HttpMessageContents;
 import net.lightbody.bmp.util.HttpMessageInfo;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ilia.rogozhin on 10.10.2016.
@@ -114,7 +117,19 @@ public class BMPResponseFilter {
     }
 
     public String toFilterString() {
-        String result = "";
+        String result = "var flag = true;";
+        if (overridesUrl != null && overridesUrl.size() > 0) {
+            result += "flag = false;";
+            result += "var PatternClass = Java.type('java.util.regex.Pattern');";
+            result += "var MatcherClass = Java.type('java.util.regex.Matcher');";
+            result += "var pattern; var matcher;";
+            for (String overridesUrlRegexp : overridesUrl) {
+                result += String.format("pattern = PatternClass.compile('%s');", overridesUrlRegexp);
+                result += "matcher = pattern.matcher(messageInfo.getOriginalUrl());";
+                result += "if (matcher.find()) { flag = true }";
+            }
+        }
+        result += "if (flag) {";
         if (contents != null) {
             if (contents.getTextContents() != null) {
                 result += String.format("contents.setTextContents('%s');", contents.getTextContents());
@@ -143,6 +158,7 @@ public class BMPResponseFilter {
                 result += "response.headers().set(httpHeaders);";
             }
         }
+        result += "}";
         return result;
     }
 }
