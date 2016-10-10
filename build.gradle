@@ -25,13 +25,6 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 }
 
-task fatJar(type: Jar) {
-    baseName = project.name + '-all'
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
@@ -50,50 +43,4 @@ artifacts {
 
 signing {
     sign configurations.archives
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'BrowserMob Proxy Client'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'Rest client for BrowserMob proxy https://github.com/lightbody/browsermob-proxy'
-                url 'https://github.com/smallcreep/browsermob-proxy-client'
-
-                scm {
-                    connection 'scm:git@github.com:smallcreep/browsermob-proxy-client.git'
-                    developerConnection 'scm:git@github.com:smallcreep/browsermob-proxy-client.git/'
-                    url 'scm:git@github.com:smallcreep/browsermob-proxy-client.git'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'smallcreep'
-                        name 'Ilia Rogozhin'
-                        email 'ilia.rogozhin@gmail.com'
-                    }
-                }
-            }
-        }
-    }
 }
