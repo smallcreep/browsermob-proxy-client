@@ -16,10 +16,7 @@
 
 package com.github.smallcreep.bmp.client;
 
-import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
+import com.github.smallcreep.bmp.client.parameters.*;
 import com.github.smallcreep.convertor.json.GsonStringConverterFactory;
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Retrofit;
@@ -150,6 +147,8 @@ public abstract class BMPProxy {
     public abstract void resetDNSCache() throws IOException;
 
     public abstract void setFilterResponse(String methodResponse) throws IOException;
+
+    public abstract void setFilterResponse(BMPResponseFilter bmpResponseFilter) throws IOException;
 
     @Override
     public boolean equals(Object o) {

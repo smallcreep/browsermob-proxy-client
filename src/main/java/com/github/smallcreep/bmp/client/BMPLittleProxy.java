@@ -16,10 +16,7 @@
 
 package com.github.smallcreep.bmp.client;
 
-import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
+import com.github.smallcreep.bmp.client.parameters.*;
 import net.lightbody.bmp.core.har.Har;
 
 import java.io.IOException;
@@ -134,5 +131,10 @@ public class BMPLittleProxy extends BMPProxy {
     @Override
     public void setFilterResponse(String methodResponse) throws IOException {
         getBmpProxyServices().setFilterResponse(getPort(), methodResponse).execute();
+    }
+
+    @Override
+    public void setFilterResponse(BMPResponseFilter bmpResponseFilter) throws IOException {
+        setFilterResponse(bmpResponseFilter.toFilterString());
     }
 }

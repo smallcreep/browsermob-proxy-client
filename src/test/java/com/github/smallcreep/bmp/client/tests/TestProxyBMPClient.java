@@ -17,18 +17,20 @@
 package com.github.smallcreep.bmp.client.tests;
 
 import com.github.smallcreep.bmp.client.BMPLittleProxy;
-import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
-import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
+import com.github.smallcreep.bmp.client.parameters.*;
 import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
 import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import com.github.smallcreep.bmp.client.tests.util.ProxyTest;
+import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import net.lightbody.bmp.core.har.Har;
 import net.lightbody.bmp.core.har.HarEntry;
 import net.lightbody.bmp.core.har.HarNameValuePair;
+import net.lightbody.bmp.util.HttpMessageContents;
 import org.apache.http.HttpHost;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -36,9 +38,13 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS;
+import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_MAX_AGE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -173,11 +179,45 @@ public class TestProxyBMPClient extends ProxyTest {
     }
 
     @Test
-    public void testOverridesResponse() throws Throwable {
-        getBmpLittleProxy().setFilterResponse("contents.setTextContents('<html><body>Response successfully intercepted</body></html>');");
+    public void testOverridesResponseAsString() throws Throwable {
+        getBmpLittleProxy()
+                .setFilterResponse("contents.setTextContents('<html><body>Response successfully intercepted</body></html>'); " +
+                        "var HttpResponseStatusClass = Java.type('io.netty.handler.codec.http.HttpResponseStatus'); " +
+                        "var st = HttpResponseStatusClass.FORBIDDEN;response.setStatus(st);");
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
         HttpResponse<String> response = Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
-        assertEquals(response.getBody(), "<html><body>Response successfully intercepted</body></html>");
+        assertEquals("<html><body>Response successfully intercepted</body></html>", response.getBody());
+        assertEquals(HttpResponseStatus.FORBIDDEN.code(), response.getStatus());
+    }
 
+    @Test
+    public void testOverridesResponseAsResponseFilter() throws Throwable {
+        Headers headersExpected = new Headers();
+        List<String> accessControlAllowCredentialsList = new ArrayList<>();
+        accessControlAllowCredentialsList.add("test");
+        accessControlAllowCredentialsList.add("test2");
+        headersExpected.put(ACCESS_CONTROL_ALLOW_CREDENTIALS, accessControlAllowCredentialsList);
+        List<String> accessControlMaxAgeList = new ArrayList<>();
+        accessControlMaxAgeList.add("test3");
+        headersExpected.put(ACCESS_CONTROL_MAX_AGE, accessControlMaxAgeList);
+        io.netty.handler.codec.http.HttpResponse responseOverrides = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN);
+        for (String headers : headersExpected.keySet()) {
+            for (String headersValue : headersExpected.get(headers)) {
+                responseOverrides.headers().add(headers, headersValue);
+            }
+        }
+        HttpMessageContents contents = new HttpMessageContents(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN));
+        contents.setTextContents("<html><body>Response successfully intercepted</body></html>");
+        BMPResponseFilter bmpResponseFilter = new BMPResponseFilter(responseOverrides, contents, null);
+        getBmpLittleProxy().setFilterResponse(bmpResponseFilter);
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+        HttpResponse<String> response = Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        assertEquals("<html><body>Response successfully intercepted</body></html>", response.getBody());
+        assertEquals(HttpResponseStatus.FORBIDDEN.code(), response.getStatus());
+        assertEquals(HttpResponseStatus.FORBIDDEN.reasonPhrase(), response.getStatusText());
+        assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+        assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
     }
 }
