@@ -49,4 +49,8 @@ public interface BMPProxyServices {
 
     @DELETE("{port}/dns/cache")
     Call<Void> resetDNSCache(@Path("port") int port);
+
+    @Headers("Content-Type: text/plain")
+    @POST("{port}/filter/response")
+    Call<Void> setFilterResponse(@Path("port") int port, @Body String content);
 }

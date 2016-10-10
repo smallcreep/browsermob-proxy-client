@@ -24,6 +24,7 @@ import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
 import com.github.smallcreep.bmp.client.response.ProxyDescriptor;
 import com.github.smallcreep.bmp.client.response.ProxyListDescriptor;
 import com.github.smallcreep.bmp.client.tests.util.ProxyTest;
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import net.lightbody.bmp.core.har.Har;
 import net.lightbody.bmp.core.har.HarEntry;
@@ -169,5 +170,14 @@ public class TestProxyBMPClient extends ProxyTest {
                 .contains(new HarNameValuePair(HEADER_NAME_1, HEADER_VALUE_1)));
         assertTrue(getBmpLittleProxy().getHar().getLog().getEntries().get(0).getRequest().getHeaders()
                 .contains(new HarNameValuePair(HEADER_NAME_2, HEADER_VALUE_2)));
+    }
+
+    @Test
+    public void testOverridesResponse() throws Throwable {
+        getBmpLittleProxy().setFilterResponse("contents.setTextContents('<html><body>Response successfully intercepted</body></html>');");
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+        HttpResponse<String> response = Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        assertEquals(response.getBody(), "<html><body>Response successfully intercepted</body></html>");
+
     }
 }

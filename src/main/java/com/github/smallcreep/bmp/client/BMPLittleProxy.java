@@ -130,4 +130,9 @@ public class BMPLittleProxy extends BMPProxy {
     public void resetDNSCache() throws IOException {
         getBmpProxyServices().resetDNSCache(getPort()).execute();
     }
+
+    @Override
+    public void setFilterResponse(String methodResponse) throws IOException {
+        getBmpProxyServices().setFilterResponse(getPort(), methodResponse).execute();
+    }
 }

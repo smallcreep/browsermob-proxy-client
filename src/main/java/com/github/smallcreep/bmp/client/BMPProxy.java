@@ -20,6 +20,7 @@ import com.github.smallcreep.bmp.client.parameters.BMPDNSParameters;
 import com.github.smallcreep.bmp.client.parameters.BMPHeadersParameters;
 import com.github.smallcreep.bmp.client.parameters.BMPPageParameters;
 import com.github.smallcreep.bmp.client.parameters.BMPHarParameters;
+import com.github.smallcreep.convertor.json.GsonStringConverterFactory;
 import net.lightbody.bmp.core.har.Har;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -123,6 +124,7 @@ public abstract class BMPProxy {
     protected void lazyInitializeBMPProxyServices() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(String.format("%s://%s:%s%s", protocol, proxyManagerAddress, proxyManagerPort, PATH_PROXY))
+                .addConverterFactory(new GsonStringConverterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -146,6 +148,8 @@ public abstract class BMPProxy {
     public abstract Har getHar() throws IOException;
 
     public abstract void resetDNSCache() throws IOException;
+
+    public abstract void setFilterResponse(String methodResponse) throws IOException;
 
     @Override
     public boolean equals(Object o) {
