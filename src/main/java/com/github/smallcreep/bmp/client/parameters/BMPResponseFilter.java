@@ -16,17 +16,14 @@
 
 package com.github.smallcreep.bmp.client.parameters;
 
-import com.sun.xml.internal.ws.api.ha.StickyFeature;
 import io.netty.handler.codec.http.HttpResponse;
 import net.lightbody.bmp.util.HttpMessageContents;
 import net.lightbody.bmp.util.HttpMessageInfo;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Created by ilia.rogozhin on 10.10.2016.
+ * Created by Ilia Rogozhin on 10.10.2016.
  */
 public class BMPResponseFilter {
 
@@ -143,10 +140,7 @@ public class BMPResponseFilter {
                 result += "response.setStatus(status);";
             }
             if (response.headers() != null) {
-/*                result += "var SetClass = Java.type('java.util.Set');";
-                result += "var headersName = response.headers().names();";
-                result += "var iterator = headersName.size();";
-                result += "for (var i = 0; i < iterator; i++) { response.headers().remove(response.headers().names().toArray()[i].toString()); }";*/
+                result += "response.headers().clear();";
                 result += "var HttpHeadersClass = Java.type('io.netty.handler.codec.http.HttpHeaders');";
                 result += "var DefaultHttpHeadersClass = Java.type('io.netty.handler.codec.http.DefaultHttpHeaders');";
                 result += "var httpHeaders = new DefaultHttpHeadersClass();";
