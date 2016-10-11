@@ -30,7 +30,7 @@ public class BMPResponseFilter {
     private HttpResponse response = null;
     private HttpMessageContents contents = null;
     private HttpMessageInfo messageInfo = null;
-    private List<String> overridesUrl = null;
+    private List<FilterUrls> overridesUrls = null;
 
     public BMPResponseFilter() {
     }
@@ -41,11 +41,12 @@ public class BMPResponseFilter {
         this.messageInfo = messageInfo;
     }
 
-    public BMPResponseFilter(HttpResponse response, HttpMessageContents contents, HttpMessageInfo messageInfo, List<String> overridesUrl) {
+    public BMPResponseFilter(HttpResponse response, HttpMessageContents contents, HttpMessageInfo messageInfo,
+                             List<FilterUrls> overridesUrls) {
         this.response = response;
         this.contents = contents;
         this.messageInfo = messageInfo;
-        this.overridesUrl = overridesUrl;
+        this.overridesUrls = overridesUrls;
     }
 
     public HttpResponse getResponse() {
@@ -72,12 +73,12 @@ public class BMPResponseFilter {
         this.messageInfo = messageInfo;
     }
 
-    public List<String> getOverridesUrl() {
-        return overridesUrl;
+    public List<FilterUrls> getOverridesUrls() {
+        return overridesUrls;
     }
 
-    public void setOverridesUrl(List<String> overridesUrl) {
-        this.overridesUrl = overridesUrl;
+    public void setOverridesUrls(List<FilterUrls> overridesUrls) {
+        this.overridesUrls = overridesUrls;
     }
 
     @Override
@@ -90,7 +91,7 @@ public class BMPResponseFilter {
         if (response != null ? !response.equals(that.response) : that.response != null) return false;
         if (contents != null ? !contents.equals(that.contents) : that.contents != null) return false;
         if (messageInfo != null ? !messageInfo.equals(that.messageInfo) : that.messageInfo != null) return false;
-        return overridesUrl != null ? overridesUrl.equals(that.overridesUrl) : that.overridesUrl == null;
+        return overridesUrls != null ? overridesUrls.equals(that.overridesUrls) : that.overridesUrls == null;
 
     }
 
@@ -99,7 +100,7 @@ public class BMPResponseFilter {
         int result = response != null ? response.hashCode() : 0;
         result = 31 * result + (contents != null ? contents.hashCode() : 0);
         result = 31 * result + (messageInfo != null ? messageInfo.hashCode() : 0);
-        result = 31 * result + (overridesUrl != null ? overridesUrl.hashCode() : 0);
+        result = 31 * result + (overridesUrls != null ? overridesUrls.hashCode() : 0);
         return result;
     }
 
@@ -109,21 +110,29 @@ public class BMPResponseFilter {
                 "response=" + response +
                 ", contents=" + contents +
                 ", messageInfo=" + messageInfo +
-                ", overridesUrl=" + overridesUrl +
+                ", overridesUrls=" + overridesUrls +
                 '}';
     }
 
     public String toFilterString() {
         String result = "var flag = true;";
-        if (overridesUrl != null && overridesUrl.size() > 0) {
+        if (overridesUrls != null && overridesUrls.size() > 0) {
             result += "flag = false;";
             result += "var PatternClass = Java.type('java.util.regex.Pattern');";
             result += "var MatcherClass = Java.type('java.util.regex.Matcher');";
             result += "var pattern; var matcher;";
-            for (String overridesUrlRegexp : overridesUrl) {
-                result += String.format("pattern = PatternClass.compile('%s');", overridesUrlRegexp);
-                result += "matcher = pattern.matcher(messageInfo.getOriginalUrl());";
-                result += "if (matcher.find()) { flag = true }";
+            for (FilterUrls overridesUrl : overridesUrls) {
+                if (overridesUrl.getRegexpUrl() != null) {
+                    result += String.format("pattern = PatternClass.compile('%s');", overridesUrl.getRegexpUrl());
+                    result += "matcher = pattern.matcher(messageInfo.getOriginalUrl());";
+                    if (overridesUrl.getUrlMethod() != null) {
+                        result += String.format("if (matcher.find() && " +
+                                "messageInfo.getOriginalRequest().getMethod().toString() == '%s') { flag = true }",
+                                overridesUrl.getUrlMethod().toString());
+                    } else {
+                        result += "if (matcher.find()) { flag = true }";
+                    }
+                }
             }
         }
         result += "if (flag) {";
@@ -135,8 +144,8 @@ public class BMPResponseFilter {
         if (response != null) {
             if (response.getStatus() != null) {
                 result += "var HttpResponseStatusClass = Java.type('io.netty.handler.codec.http.HttpResponseStatus');";
-                result += String.format("var status = new HttpResponseStatusClass(%d, '%s');", response.getStatus().code(),
-                        response.getStatus().reasonPhrase());
+                result += String.format("var status = new HttpResponseStatusClass(%d, '%s');",
+                        response.getStatus().code(), response.getStatus().reasonPhrase());
                 result += "response.setStatus(status);";
             }
             if (response.headers() != null) {
@@ -144,8 +153,8 @@ public class BMPResponseFilter {
                 result += "var HttpHeadersClass = Java.type('io.netty.handler.codec.http.HttpHeaders');";
                 result += "var DefaultHttpHeadersClass = Java.type('io.netty.handler.codec.http.DefaultHttpHeaders');";
                 result += "var httpHeaders = new DefaultHttpHeadersClass();";
-                for (String headerName: response.headers().names()) {
-                    for (String headersValue: response.headers().getAll(headerName)) {
+                for (String headerName : response.headers().names()) {
+                    for (String headersValue : response.headers().getAll(headerName)) {
                         result += String.format("httpHeaders.add('%s', '%s');", headerName, headersValue);
                     }
                 }
