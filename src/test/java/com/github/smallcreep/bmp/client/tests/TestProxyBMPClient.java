@@ -45,9 +45,7 @@ import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS;
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_MAX_AGE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Ilia Rogozhin on 04.10.2016.
@@ -244,7 +242,7 @@ public class TestProxyBMPClient extends ProxyTest {
         contents.setTextContents("<html><body>Response successfully intercepted</body></html>");
         List<String> overrideUrls = new ArrayList<>();
         overrideUrls.add("(.*)index\\.html(.*)");
-        overrideUrls.add(URL_PROTOCOL + URL_FOR_TEST);
+        overrideUrls.add("^http:\\/\\/search\\.maven\\.org\\/$");
         BMPResponseFilter bmpResponseFilter = new BMPResponseFilter(responseOverrides, contents, null, overrideUrls);
         getBmpLittleProxy().setFilterResponse(bmpResponseFilter);
         Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
@@ -256,15 +254,15 @@ public class TestProxyBMPClient extends ProxyTest {
         assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
         assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
 
-        response = Unirest.get("http://abracadabra.alibaba" + "/index.html").asString();
+        response = Unirest.get("http://oss.sonatype.org/index.html").asString();
         assertEquals("<html><body>Response successfully intercepted</body></html>", response.getBody());
         assertEquals(HttpResponseStatus.FORBIDDEN.code(), response.getStatus());
         assertEquals(HttpResponseStatus.FORBIDDEN.reasonPhrase(), response.getStatusText());
         assertEquals(accessControlAllowCredentialsList, response.getHeaders().get(ACCESS_CONTROL_ALLOW_CREDENTIALS));
         assertEquals(accessControlMaxAgeList, response.getHeaders().get(ACCESS_CONTROL_MAX_AGE));
 
-        response = Unirest.get("http://abracadabra.alibaba").asString();
-        assertEquals("", response.getBody());
+        response = Unirest.get("http://search.maven.org/abracadabra.alibaba").asString();
+        assertEquals("<html><head><title>Apache Tomcat/6.0.29 - Error report</title><style><!--H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}--></style> </head><body><h1>HTTP Status 404 - /abracadabra.alibaba</h1><HR size=\"1\" noshade=\"noshade\"><p><b>type</b> Status report</p><p><b>message</b> <u>/abracadabra.alibaba</u></p><p><b>description</b> <u>The requested resource (/abracadabra.alibaba) is not available.</u></p><HR size=\"1\" noshade=\"noshade\"><h3>Apache Tomcat/6.0.29</h3></body></html>", response.getBody());
         assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatus());
         assertEquals(HttpResponseStatus.NOT_FOUND.reasonPhrase(), response.getStatusText());
         assertFalse(response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_CREDENTIALS));
