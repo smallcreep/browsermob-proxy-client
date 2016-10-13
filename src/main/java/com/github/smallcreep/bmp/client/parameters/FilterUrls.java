@@ -16,6 +16,7 @@
 
 package com.github.smallcreep.bmp.client.parameters;
 
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
@@ -25,6 +26,7 @@ public class FilterUrls {
 
     private String regexpUrl = null;
     private HttpMethod urlMethod = null;
+    private HttpHeaders httpHeaders = null;
 
     public FilterUrls() {
     }
@@ -36,6 +38,12 @@ public class FilterUrls {
     public FilterUrls(String regexpUrl, HttpMethod urlMethod) {
         this.regexpUrl = regexpUrl;
         this.urlMethod = urlMethod;
+    }
+
+    public FilterUrls(String regexpUrl, HttpMethod urlMethod, HttpHeaders httpHeaders) {
+        this.regexpUrl = regexpUrl;
+        this.urlMethod = urlMethod;
+        this.httpHeaders = httpHeaders;
     }
 
     public String getRegexpUrl() {
@@ -54,6 +62,14 @@ public class FilterUrls {
         this.urlMethod = urlMethod;
     }
 
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -70,6 +86,7 @@ public class FilterUrls {
     public int hashCode() {
         int result = regexpUrl != null ? regexpUrl.hashCode() : 0;
         result = 31 * result + (urlMethod != null ? urlMethod.hashCode() : 0);
+        result = 31 * result + (httpHeaders != null ? httpHeaders.hashCode() : 0);
         return result;
     }
 
@@ -78,6 +95,7 @@ public class FilterUrls {
         return "FilterUrls{" +
                 "regexpUrl='" + regexpUrl + '\'' +
                 ", urlMethod=" + urlMethod +
+                ", httpHeaders=" + httpHeaders +
                 '}';
     }
 }

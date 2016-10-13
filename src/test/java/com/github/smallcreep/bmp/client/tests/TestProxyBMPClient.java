@@ -24,10 +24,7 @@ import com.github.smallcreep.bmp.client.tests.util.ProxyTest;
 import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import net.lightbody.bmp.core.har.Har;
 import net.lightbody.bmp.core.har.HarEntry;
 import net.lightbody.bmp.core.har.HarNameValuePair;
@@ -264,6 +261,45 @@ public class TestProxyBMPClient extends ProxyTest {
         response = Unirest.get("http://search.maven.org/abracadabra.alibaba").asString();
         assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
         response = Unirest.post("http://search.maven.org/abracadabra.alibaba").asString();
+        assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
+    }
+
+    @Test
+    public void testOverridesResponseAsResponseFilterAndType() throws Throwable {
+        Headers headersExpected = new Headers();
+        List<String> accessControlAllowCredentialsList = new ArrayList<>();
+        accessControlAllowCredentialsList.add("test");
+        accessControlAllowCredentialsList.add("test2");
+        headersExpected.put(ACCESS_CONTROL_ALLOW_CREDENTIALS, accessControlAllowCredentialsList);
+        List<String> accessControlMaxAgeList = new ArrayList<>();
+        accessControlMaxAgeList.add("test3");
+        headersExpected.put(ACCESS_CONTROL_MAX_AGE, accessControlMaxAgeList);
+        io.netty.handler.codec.http.HttpResponse responseOverrides = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN);
+        for (String headers : headersExpected.keySet()) {
+            for (String headersValue : headersExpected.get(headers)) {
+                responseOverrides.headers().add(headers, headersValue);
+            }
+        }
+        HttpMessageContents contents = new HttpMessageContents(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FORBIDDEN));
+        contents.setTextContents("<html><body>Response successfully intercepted</body></html>");
+        List<FilterUrls> filterUrls = new ArrayList<>();
+        DefaultHttpHeaders httpHeaders = new DefaultHttpHeaders();
+        httpHeaders.add(HttpHeaders.Names.CONTENT_TYPE, "text/css");
+        filterUrls.add(new FilterUrls("^http:\\/\\/search\\.maven\\.org\\/(.*)$", HttpMethod.GET, httpHeaders));
+
+        BMPResponseFilter bmpResponseFilter = new BMPResponseFilter(responseOverrides, contents, null, filterUrls);
+        getBmpLittleProxy().setFilterResponse(bmpResponseFilter);
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+
+        HttpResponse<String> response = Unirest.get("http://search.maven.org/ajaxsolr/css/central.css").asString();
+        assertOverrideResponseEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
+
+        response = Unirest.get("http://search.maven.org/test.html").asString();
+        assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
+
+        response = Unirest.get("http://search.maven.org/").asString();
         assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
     }
 

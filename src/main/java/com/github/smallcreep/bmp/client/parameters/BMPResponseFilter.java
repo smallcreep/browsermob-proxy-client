@@ -21,6 +21,7 @@ import net.lightbody.bmp.util.HttpMessageContents;
 import net.lightbody.bmp.util.HttpMessageInfo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Ilia Rogozhin on 10.10.2016.
@@ -125,13 +126,27 @@ public class BMPResponseFilter {
                 if (overridesUrl.getRegexpUrl() != null) {
                     result += String.format("pattern = PatternClass.compile('%s');", overridesUrl.getRegexpUrl());
                     result += "matcher = pattern.matcher(messageInfo.getOriginalUrl());";
+                    result += "if (matcher.find()";
                     if (overridesUrl.getUrlMethod() != null) {
-                        result += String.format("if (matcher.find() && " +
-                                "messageInfo.getOriginalRequest().getMethod().toString() == '%s') { flag = true }",
+                        result += String.format(" && messageInfo.getOriginalRequest().getMethod().toString() == '%s'",
                                 overridesUrl.getUrlMethod().toString());
-                    } else {
-                        result += "if (matcher.find()) { flag = true }";
                     }
+                    if (overridesUrl.getHttpHeaders() != null) {
+                        Set<String> httpHeadersNames = overridesUrl.getHttpHeaders().names();
+                        for (String httpHeadersName: httpHeadersNames) {
+                            result += String.format(" && response.headers().contains('%s')", httpHeadersName);
+                            if (overridesUrl.getHttpHeaders().getAll(httpHeadersName).size() > 0) {
+                                result += String.format(" && response.headers().getAll('%s').size() == %s",
+                                        httpHeadersName, overridesUrl.getHttpHeaders().getAll(httpHeadersName).size());
+                                for (String httpHeadersValue : overridesUrl.getHttpHeaders().getAll(httpHeadersName)) {
+                                    result += String.format(" && response.headers().getAll('%s').contains('%s')",
+                                            httpHeadersName, httpHeadersValue);
+                                }
+                            }
+                        }
+
+                    }
+                    result += ") { flag = true }";
                 }
             }
         }
