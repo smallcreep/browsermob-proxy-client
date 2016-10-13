@@ -20,6 +20,7 @@ import net.lightbody.bmp.core.har.Har;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,4 +54,14 @@ public interface BMPProxyServices {
     @Headers("Content-Type: text/plain")
     @POST("{port}/filter/response")
     Call<Void> setFilterResponse(@Path("port") int port, @Body String content);
+
+    @FormUrlEncoded
+    @PUT("{port}/whitelist")
+    Call<Void> setWhiteList(@Path("port") int port, @FieldMap Map<String, String> fields);
+
+    @GET("{port}/whitelist")
+    Call<List<String>> getWhiteList(@Path("port") int port);
+
+    @DELETE("{port}/whitelist")
+    Call<Void> deleteWhiteList(@Path("port") int port);
 }

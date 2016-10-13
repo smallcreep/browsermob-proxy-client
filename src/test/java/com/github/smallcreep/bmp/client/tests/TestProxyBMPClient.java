@@ -39,10 +39,7 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS;
 import static io.netty.handler.codec.http.HttpHeaders.Names.ACCESS_CONTROL_MAX_AGE;
@@ -59,6 +56,7 @@ public class TestProxyBMPClient extends ProxyTest {
     public static final String HEADER_NAME_2 = "Test";
     public static final String HEADER_VALUE_2 = "Test";
     public static final String PAGE_ID_FOR_TEST = "Page 2";
+
     @DataPoints
     public static int[] testData = new int[]{
             0,
@@ -153,6 +151,9 @@ public class TestProxyBMPClient extends ProxyTest {
         harExpected.getLog().addPage(getHarPage(PAGE_ID_FOR_TEST, PAGE_ID_FOR_TEST));
         HarEntry harEntryExpected = getHarEntry(PAGE_ID_FOR_TEST);
         harEntryExpected.setServerIPAddress(getADDRESS());
+        harEntryExpected.getResponse().setStatusText("");
+        harEntryExpected.getResponse().setHttpVersion("unknown");
+        harEntryExpected.getResponse().setStatus(0);
         harExpected.getLog().addEntry(harEntryExpected);
         assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
     }
@@ -250,9 +251,9 @@ public class TestProxyBMPClient extends ProxyTest {
         response = Unirest.post(URL_PROTOCOL + URL_FOR_TEST).asString();
         assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
 
-        response = Unirest.get("http://oss.sonatype.org/index.html").asString();
+        response = Unirest.get("http://search.maven.org/index.html").asString();
         assertOverrideResponseEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
-        response = Unirest.post("http://oss.sonatype.org/index.html").asString();
+        response = Unirest.post("http://search.maven.org/index.html").asString();
         assertOverrideResponseEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
 
         response = Unirest.get("http://search.maven.org/test.html").asString();
@@ -264,7 +265,133 @@ public class TestProxyBMPClient extends ProxyTest {
         assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
         response = Unirest.post("http://search.maven.org/abracadabra.alibaba").asString();
         assertOverrideResponseNotEquals(accessControlAllowCredentialsList, accessControlMaxAgeList, response);
+    }
 
+    @Test
+    public void testWhiteList() throws Throwable {
+        Har harExpected = getHarExpected();
+        getBmpLittleProxy().createNewHar();
+        BMPWhiteListParameters bmpWhiteListParameters = new BMPWhiteListParameters("(.*)index\\.html(.*),^http:\\/\\/search\\.maven\\.org\\/$", 500);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParameters);
+
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+
+        Unirest.get("http://search.maven.org/index.html").asString();
+        Unirest.post("http://search.maven.org/index.html").asString();
+
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        Unirest.post(URL_PROTOCOL + URL_FOR_TEST).asString();
+
+        HttpResponse<String> response =  Unirest.get("http://search.maven.org/test.html").asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+        response = Unirest.post("http://search.maven.org/test.html").asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+
+        harExpected.getLog().addPage(getHarPage(null, null));
+
+        HarEntry harEntryExpected = getHarEntry(null);
+        harEntryExpected.getRequest().setUrl("http://search.maven.org/index.html");
+        harEntryExpected.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected);
+
+        HarEntry harEntryExpected2 = getHarEntry(null);
+        harEntryExpected2.getRequest().setUrl("http://search.maven.org/index.html");
+        harEntryExpected2.getRequest().setMethod("POST");
+        harEntryExpected2.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected2.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected2);
+
+        HarEntry harEntryExpected3 = getHarEntry(null);
+        harExpected.getLog().addEntry(harEntryExpected3);
+
+        HarEntry harEntryExpected4 = getHarEntry(null);
+        harEntryExpected4.getRequest().setMethod("POST");
+        harEntryExpected4.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected4.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected4);
+
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
+    }
+
+    @Test
+    public void testOverridesWhiteList() throws Throwable {
+        Har harExpected = getHarExpected();
+        getBmpLittleProxy().createNewHar();
+        BMPWhiteListParameters bmpWhiteListParameters = new BMPWhiteListParameters("(.*)index\\.html(.*)", 500);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParameters);
+
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+
+        Unirest.get("http://search.maven.org/index.html").asString();
+        Unirest.post("http://search.maven.org/index.html").asString();
+
+        HttpResponse<String> response = Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+        response = Unirest.post(URL_PROTOCOL + URL_FOR_TEST).asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+
+        bmpWhiteListParameters = new BMPWhiteListParameters("^http:\\/\\/search\\.maven\\.org\\/$", 500);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParameters);
+
+        response = Unirest.get("http://search.maven.org/index.html").asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+        response = Unirest.post("http://search.maven.org/index.html").asString();
+        assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.getStatus());
+
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        Unirest.post(URL_PROTOCOL + URL_FOR_TEST).asString();
+
+        harExpected.getLog().addPage(getHarPage(null, null));
+
+        HarEntry harEntryExpected = getHarEntry(null);
+        harEntryExpected.getRequest().setUrl("http://search.maven.org/index.html");
+        harEntryExpected.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected);
+
+        HarEntry harEntryExpected2 = getHarEntry(null);
+        harEntryExpected2.getRequest().setUrl("http://search.maven.org/index.html");
+        harEntryExpected2.getRequest().setMethod("POST");
+        harEntryExpected2.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected2.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected2);
+
+        HarEntry harEntryExpected3 = getHarEntry(null);
+        harExpected.getLog().addEntry(harEntryExpected3);
+
+        HarEntry harEntryExpected4 = getHarEntry(null);
+        harEntryExpected4.getRequest().setMethod("POST");
+        harEntryExpected4.getResponse().setStatusText(HttpResponseStatus.NOT_FOUND.reasonPhrase());
+        harEntryExpected4.getResponse().setStatus(HttpResponseStatus.NOT_FOUND.code());
+        harExpected.getLog().addEntry(harEntryExpected4);
+
+        assertEqualsHar(harExpected, getBmpLittleProxy().getHar());
+    }
+
+    @Test
+    public void testGetWhiteList() throws Throwable {
+        BMPWhiteListParameters bmpWhiteListParametersExpected = new BMPWhiteListParameters("(.*)index\\.html(.*),^http:\\/\\/search\\.maven\\.org\\/$", null);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParametersExpected);
+        List<String> bmpWhiteListsParametersActual = getBmpLittleProxy().getWhiteList();
+        assertEquals(Arrays.asList(bmpWhiteListParametersExpected.getRegex().split(",")), bmpWhiteListsParametersActual);
+        bmpWhiteListParametersExpected = new BMPWhiteListParameters("(.*)index\\.html(.*),^http:\\/\\/search\\.maven\\.org\\/$,test", null);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParametersExpected);
+        bmpWhiteListsParametersActual = getBmpLittleProxy().getWhiteList();
+        assertEquals(Arrays.asList(bmpWhiteListParametersExpected.getRegex().split(",")), bmpWhiteListsParametersActual);
+    }
+
+    @Test
+    public void testDeleteWhiteList() throws Throwable {
+        BMPWhiteListParameters bmpWhiteListParametersExpected = new BMPWhiteListParameters("(.*)test\\.html(.*),^http:\\/\\/search\\.maven\\.org\\/$", 500);
+        getBmpLittleProxy().setWhiteList(bmpWhiteListParametersExpected);
+        getBmpLittleProxy().deleteWhiteList();
+        List<String> bmpWhiteListsParametersActual = getBmpLittleProxy().getWhiteList();
+        List<String> bmpWhiteListsExpected = new ArrayList<>();
+        assertEquals(bmpWhiteListsExpected, bmpWhiteListsParametersActual);
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+        HttpResponse<String> response = Unirest.get("http://search.maven.org/index.html").asString();
+        assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatus());
     }
 
     private void assertOverrideResponseNotEquals(List<String> accessControlAllowCredentialsList,

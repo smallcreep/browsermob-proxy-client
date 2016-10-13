@@ -74,6 +74,7 @@ public abstract class ProxyTest extends ProxyManagerTest {
             assertEquals(harEntriesExpected.get(i).getServerIPAddress(), harEntriesActual.get(i).getServerIPAddress());
             assertEquals(harEntriesExpected.get(i).getComment(), harEntriesActual.get(i).getComment());
             assertEqualsHarRequest(harEntriesExpected.get(i).getRequest(), harEntriesActual.get(i).getRequest());
+            assertEqualsHarResponse(harEntriesExpected.get(i).getResponse(), harEntriesActual.get(i).getResponse());
         }
     }
 
@@ -82,6 +83,13 @@ public abstract class ProxyTest extends ProxyManagerTest {
         assertEquals(harRequestExpected.getMethod(), harRequestActual.getMethod());
         assertEquals(harRequestExpected.getHttpVersion(), harRequestActual.getHttpVersion());
         assertEquals(harRequestExpected.getUrl(), harRequestActual.getUrl());
+    }
+
+    private static void assertEqualsHarResponse(HarResponse harResponseExpected, HarResponse harResponseActual) {
+        assertEquals(harResponseExpected.getComment(), harResponseActual.getComment());
+        assertEquals(harResponseExpected.getStatusText(), harResponseActual.getStatusText());
+        assertEquals(harResponseExpected.getHttpVersion(), harResponseActual.getHttpVersion());
+        assertEquals(harResponseExpected.getStatus(), harResponseActual.getStatus());
     }
 
     @Before

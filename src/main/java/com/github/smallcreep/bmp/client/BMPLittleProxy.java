@@ -21,6 +21,7 @@ import net.lightbody.bmp.core.har.Har;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
@@ -136,5 +137,21 @@ public class BMPLittleProxy extends BMPProxy {
     @Override
     public void setFilterResponse(BMPResponseFilter bmpResponseFilter) throws IOException {
         setFilterResponse(bmpResponseFilter.toFilterString());
+    }
+
+    @Override
+    public void setWhiteList(BMPWhiteListParameters bmpWhiteListParameters) throws IOException {
+        if (bmpWhiteListParameters == null) bmpWhiteListParameters = new BMPWhiteListParameters();
+        getBmpProxyServices().setWhiteList(getPort(), bmpWhiteListParameters.getMapFields()).execute();
+    }
+
+    @Override
+    public List<String> getWhiteList() throws IOException {
+        return getBmpProxyServices().getWhiteList(getPort()).execute().body();
+    }
+
+    @Override
+    public void deleteWhiteList() throws IOException {
+        getBmpProxyServices().deleteWhiteList(getPort()).execute();
     }
 }

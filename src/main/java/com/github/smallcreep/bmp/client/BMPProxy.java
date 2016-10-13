@@ -23,6 +23,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Ilia Rogozhin on 02.10.2016.
@@ -149,6 +150,12 @@ public abstract class BMPProxy {
     public abstract void setFilterResponse(String methodResponse) throws IOException;
 
     public abstract void setFilterResponse(BMPResponseFilter bmpResponseFilter) throws IOException;
+
+    public abstract void setWhiteList(BMPWhiteListParameters bmpWhiteListParameters) throws IOException;
+
+    public abstract List<String> getWhiteList() throws IOException;
+
+    public abstract void deleteWhiteList() throws IOException;
 
     @Override
     public boolean equals(Object o) {
