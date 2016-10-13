@@ -1,5 +1,5 @@
 group 'com.github.smallcreep'
-version '0.2.3'
+version '0.2.4'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.1'
