@@ -430,6 +430,27 @@ public class TestProxyBMPClient extends ProxyTest {
         assertEquals(HttpResponseStatus.NOT_FOUND.code(), response.getStatus());
     }
 
+    @Test
+    public void testSetDelaysResponseFilter() throws Throwable {
+        HttpMessageContents contents = null;
+        io.netty.handler.codec.http.HttpResponse responseOverrides = null;
+        List<FilterUrls> filterUrls = new ArrayList<>();
+        filterUrls.add(new FilterUrls("^http:\\/\\/search\\.maven\\.org\\/$", HttpMethod.GET));
+        BMPResponseFilter bmpResponseFilter = new BMPResponseFilter(responseOverrides, contents, null, filterUrls,
+                Long.valueOf(20000));
+        getBmpLittleProxy().setFilterResponse(bmpResponseFilter);
+        Unirest.setProxy(new HttpHost(getBmpLittleProxy().getAddress(), getBmpLittleProxy().getPort()));
+
+        Date dateStart = new Date();
+        Unirest.get(URL_PROTOCOL + URL_FOR_TEST).asString();
+        Date dateFinish = new Date();
+        assertTrue(dateFinish.getTime() - dateStart.getTime() > 20000);
+        dateStart = new Date();
+        Unirest.post(URL_PROTOCOL + URL_FOR_TEST).asString();
+        dateFinish = new Date();
+        assertTrue(dateFinish.getTime() - dateStart.getTime() < 20000);
+    }
+
     private void assertOverrideResponseNotEquals(List<String> accessControlAllowCredentialsList,
                                                  List<String> accessControlMaxAgeList,
                                                  HttpResponse<String> response) {

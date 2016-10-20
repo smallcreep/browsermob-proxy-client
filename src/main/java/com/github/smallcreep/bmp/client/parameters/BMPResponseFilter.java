@@ -32,6 +32,7 @@ public class BMPResponseFilter {
     private HttpMessageContents contents = null;
     private HttpMessageInfo messageInfo = null;
     private List<FilterUrls> overridesUrls = null;
+    private Long delayTime = null;
 
     public BMPResponseFilter() {
     }
@@ -48,6 +49,15 @@ public class BMPResponseFilter {
         this.contents = contents;
         this.messageInfo = messageInfo;
         this.overridesUrls = overridesUrls;
+    }
+
+    public BMPResponseFilter(HttpResponse response, HttpMessageContents contents, HttpMessageInfo messageInfo,
+                             List<FilterUrls> overridesUrls, Long delayTime) {
+        this.response = response;
+        this.contents = contents;
+        this.messageInfo = messageInfo;
+        this.overridesUrls = overridesUrls;
+        this.delayTime = delayTime;
     }
 
     public HttpResponse getResponse() {
@@ -82,6 +92,14 @@ public class BMPResponseFilter {
         this.overridesUrls = overridesUrls;
     }
 
+    public Long getDelayTime() {
+        return delayTime;
+    }
+
+    public void setDelayTime(Long delayTime) {
+        this.delayTime = delayTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,7 +110,9 @@ public class BMPResponseFilter {
         if (response != null ? !response.equals(that.response) : that.response != null) return false;
         if (contents != null ? !contents.equals(that.contents) : that.contents != null) return false;
         if (messageInfo != null ? !messageInfo.equals(that.messageInfo) : that.messageInfo != null) return false;
-        return overridesUrls != null ? overridesUrls.equals(that.overridesUrls) : that.overridesUrls == null;
+        if (overridesUrls != null ? !overridesUrls.equals(that.overridesUrls) : that.overridesUrls != null)
+            return false;
+        return delayTime != null ? delayTime.equals(that.delayTime) : that.delayTime == null;
 
     }
 
@@ -102,6 +122,7 @@ public class BMPResponseFilter {
         result = 31 * result + (contents != null ? contents.hashCode() : 0);
         result = 31 * result + (messageInfo != null ? messageInfo.hashCode() : 0);
         result = 31 * result + (overridesUrls != null ? overridesUrls.hashCode() : 0);
+        result = 31 * result + (delayTime != null ? delayTime.hashCode() : 0);
         return result;
     }
 
@@ -112,6 +133,7 @@ public class BMPResponseFilter {
                 ", contents=" + contents +
                 ", messageInfo=" + messageInfo +
                 ", overridesUrls=" + overridesUrls +
+                ", delayTime=" + delayTime +
                 '}';
     }
 
@@ -155,6 +177,10 @@ public class BMPResponseFilter {
             if (contents.getTextContents() != null) {
                 result += String.format("contents.setTextContents('%s');", contents.getTextContents());
             }
+        }
+        if (delayTime != null) {
+            result += "var threadClass = Java.type('java.lang.Thread');";
+            result += String.format("threadClass.sleep(%s);", delayTime);
         }
         if (response != null) {
             if (response.getStatus() != null) {
